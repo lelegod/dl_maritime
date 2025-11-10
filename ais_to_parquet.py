@@ -13,6 +13,7 @@ def fn(file_path, out_path):
         "Latitude": float,
         "# Timestamp": "object",
         "Type of mobile": "object",
+        "Ship type": "object"
     }
     usecols = list(dtypes.keys())
     df = pandas.read_csv(file_path, usecols=usecols, dtype=dtypes)
