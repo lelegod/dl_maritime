@@ -26,15 +26,13 @@ def segment_and_renumber(df):
         g = g.sort_values("Timestamp").reset_index(drop=True)
         dt = g["Timestamp"].diff().dt.total_seconds().fillna(0)
         seg_raw = (dt > GAP_BREAK_MIN * 60).cumsum()
-        seg_renum = pd.factorize(seg_raw)[0] + 1
-        g["Segment"] = seg_renum
+        g["Segment"] = seg_raw - seg_raw.min() + 1
         segmented.append(g)
     return pd.concat(segmented, ignore_index=True)
 
 # --- Load data
 df = pd.read_csv(DATA_PATH, parse_dates=["Timestamp"])
 df = df.sort_values(["MMSI", "Timestamp"]).reset_index(drop=True)
-
 # --- Segment first (sequential per MMSI)
 df = segment_and_renumber(df)
 
@@ -73,8 +71,15 @@ for (mmsi, seg), g in df.groupby(["MMSI", "Segment"], observed=True):
 
     results.append(g1)
 
+
 # --- Combine & save
 df_clean = pd.concat(results).reset_index()
+print("Before deleting", len(df_clean))
+missing = df_clean[df_clean[["SOG", "COG", "Latitude", "Longtitude"]].isna().any(axis=1)]
+print(f"Missing numeric data rows: {len(missing)}")
+# Removing rows with empty data approximately 6%
+df_clean = df_clean.dropna(subset=["SOG", "COG", "Latitude", "Longtitude", "MMSI", "Segment"])
+print("After deleting", len(df_clean))
 df_clean.to_csv(OUTPUT_PATH, index=False)
 
 print(f"Cleaned 1-minute AIS data saved to: {OUTPUT_PATH}")
