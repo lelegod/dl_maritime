@@ -1,0 +1,991 @@
+MMSI: 200000000, Ship Type: Tanker
+MMSI: 200000001, Ship Type: Unknown
+MMSI: 203247191, Ship Type: Sailing vessel
+MMSI: 205210000, Ship Type: Other type
+MMSI: 209056000, Ship Type: Cargo ship
+MMSI: 209114000, Ship Type: Cargo ship
+MMSI: 209151000, Ship Type: Cargo ship
+MMSI: 209183000, Ship Type: Passenger ship
+MMSI: 209239000, Ship Type: Cargo ship
+MMSI: 209318000, Ship Type: Cargo ship
+MMSI: 209336000, Ship Type: Cargo ship
+MMSI: 209356000, Ship Type: Tanker (HAZ-D)
+MMSI: 209392000, Ship Type: Passenger ship
+MMSI: 209415000, Ship Type: Tanker (HAZ-A)
+MMSI: 209530000, Ship Type: Cargo ship
+MMSI: 209531000, Ship Type: Cargo ship
+MMSI: 209535000, Ship Type: Cargo ship
+MMSI: 209536000, Ship Type: Cargo ship
+MMSI: 209621000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 209762000, Ship Type: Cargo ship
+MMSI: 209764000, Ship Type: Passenger ship
+MMSI: 209864000, Ship Type: Passenger ship
+MMSI: 209867000, Ship Type: Passenger ship
+MMSI: 209903000, Ship Type: Cargo ship
+MMSI: 209974000, Ship Type: Cargo ship
+MMSI: 209982000, Ship Type: Cargo ship
+MMSI: 210046000, Ship Type: Cargo ship
+MMSI: 210056000, Ship Type: Tanker
+MMSI: 210071000, Ship Type: Cargo ship
+MMSI: 210095000, Ship Type: Passenger ship
+MMSI: 210144000, Ship Type: Tanker
+MMSI: 210155000, Ship Type: Tanker
+MMSI: 210174000, Ship Type: Passenger ship
+MMSI: 210307000, Ship Type: Cargo ship
+MMSI: 210336000, Ship Type: Tanker (HAZ-B)
+MMSI: 210350000, Ship Type: Cargo ship
+MMSI: 210359000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 210382000, Ship Type: Cargo ship
+MMSI: 210399000, Ship Type: Passenger ship
+MMSI: 210425000, Ship Type: Passenger ship
+MMSI: 210510000, Ship Type: Passenger ship
+MMSI: 210552000, Ship Type: Cargo ship
+MMSI: 210553000, Ship Type: Cargo ship
+MMSI: 210731000, Ship Type: Cargo ship
+MMSI: 210935000, Ship Type: Cargo ship
+MMSI: 211101000, Ship Type: Fishing vessel
+MMSI: 211138490, Ship Type: Cargo ship
+MMSI: 211159000, Ship Type: Fishing vessel
+MMSI: 211179240, Ship Type: Law enforcment
+MMSI: 211187510, Ship Type: Pilot
+MMSI: 211188000, Ship Type: Passenger ship
+MMSI: 211190000, Ship Type: Passenger ship
+MMSI: 211202400, Ship Type: Cargo ship
+MMSI: 211202570, Ship Type: Other type
+MMSI: 211207990, Ship Type: Law enforcment
+MMSI: 211212200, Ship Type: Other type
+MMSI: 211212220, Ship Type: Military ops
+MMSI: 211212690, Ship Type: Military ops
+MMSI: 211212700, Ship Type: Military ops
+MMSI: 211214250, Ship Type: Dredging or UW ops
+MMSI: 211216490, Ship Type: Tug
+MMSI: 211216500, Ship Type: Tug
+MMSI: 211219990, Ship Type: Anti-polution
+MMSI: 211222290, Ship Type: Unknown
+MMSI: 211222710, Ship Type: Tug
+MMSI: 211222960, Ship Type: Passenger ship
+MMSI: 211223210, Ship Type: Law enforcment
+MMSI: 211224320, Ship Type: Law enforcment
+MMSI: 211224560, Ship Type: Dredging or UW ops
+MMSI: 211255580, Ship Type: Passenger ship
+MMSI: 211264530, Ship Type: Other type
+MMSI: 211264670, Ship Type: Other type
+MMSI: 211265610, Ship Type: Pilot
+MMSI: 211269660, Ship Type: HSC
+MMSI: 211277080, Ship Type: Unknown
+MMSI: 211282410, Ship Type: Fishing vessel
+MMSI: 211286440, Ship Type: Cargo ship
+MMSI: 211291160, Ship Type: Passenger ship
+MMSI: 211291170, Ship Type: Passenger ship
+MMSI: 211292150, Ship Type: Other type
+MMSI: 211294830, Ship Type: Other type
+MMSI: 211314800, Ship Type: Fishing vessel
+MMSI: 211316900, Ship Type: Fishing vessel
+MMSI: 211318980, Ship Type: SAR
+MMSI: 211319670, Ship Type: Fishing vessel
+MMSI: 211352570, Ship Type: Sailing vessel
+MMSI: 211356520, Ship Type: Law enforcment
+MMSI: 211363300, Ship Type: Fishing vessel
+MMSI: 211364330, Ship Type: Fishing vessel
+MMSI: 211379770, Ship Type: Passenger ship
+MMSI: 211388680, Ship Type: Fishing vessel
+MMSI: 211390900, Ship Type: SAR
+MMSI: 211404810, Ship Type: Law enforcment
+MMSI: 211405010, Ship Type: SAR
+MMSI: 211410690, Ship Type: Fishing vessel
+MMSI: 211413470, Ship Type: Fishing vessel
+MMSI: 211415000, Ship Type: Fishing vessel
+MMSI: 211416000, Ship Type: Fishing vessel
+MMSI: 211440370, Ship Type: Passenger ship
+MMSI: 211445190, Ship Type: Passenger ship
+MMSI: 211462260, Ship Type: Other type
+MMSI: 211493380, Ship Type: Passenger ship
+MMSI: 211514540, Ship Type: Pilot
+MMSI: 211517200, Ship Type: Fishing vessel
+MMSI: 211533730, Ship Type: Pilot
+MMSI: 211543450, Ship Type: Passenger ship
+MMSI: 211548430, Ship Type: Law enforcment
+MMSI: 211551940, Ship Type: Passenger ship
+MMSI: 211552000, Ship Type: Fishing vessel
+MMSI: 211590700, Ship Type: Passenger ship
+MMSI: 211594520, Ship Type: Passenger ship
+MMSI: 211594530, Ship Type: Passenger ship
+MMSI: 211609560, Ship Type: Other type
+MMSI: 211611070, Ship Type: Tug
+MMSI: 211613730, Ship Type: SAR
+MMSI: 211624750, Ship Type: Other type
+MMSI: 211648000, Ship Type: Fishing vessel
+MMSI: 211686000, Ship Type: Cargo ship
+MMSI: 211718360, Ship Type: Cargo ship
+MMSI: 211727510, Ship Type: Passenger ship
+MMSI: 211770520, Ship Type: Other type
+MMSI: 211789180, Ship Type: Fishing vessel
+MMSI: 211800420, Ship Type: SAR
+MMSI: 211815120, Ship Type: Ship type not found
+MMSI: 211815680, Ship Type: Law enforcment
+MMSI: 211833370, Ship Type: Tug
+MMSI: 211833390, Ship Type: Cargo ship
+MMSI: 211865680, Ship Type: Passenger ship
+MMSI: 211870240, Ship Type: Cargo ship
+MMSI: 211881570, Ship Type: Pilot
+MMSI: 211887350, Ship Type: HSC
+MMSI: 211911000, Ship Type: Other type
+MMSI: 212198000, Ship Type: Cargo ship
+MMSI: 212423000, Ship Type: Ship type not found
+MMSI: 212530000, Ship Type: Cargo ship
+MMSI: 212542000, Ship Type: Cargo ship
+MMSI: 212613000, Ship Type: Cargo ship
+MMSI: 212673000, Ship Type: Cargo ship
+MMSI: 212797000, Ship Type: Cargo ship
+MMSI: 212801000, Ship Type: Cargo ship
+MMSI: 212821000, Ship Type: Cargo ship
+MMSI: 212880000, Ship Type: Cargo ship
+MMSI: 212882000, Ship Type: Cargo ship
+MMSI: 212900000, Ship Type: Cargo ship
+MMSI: 215114000, Ship Type: Cargo ship
+MMSI: 215116000, Ship Type: Ship type not found
+MMSI: 215195000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 215209000, Ship Type: Ship type not found
+MMSI: 215211000, Ship Type: Tanker
+MMSI: 215253000, Ship Type: Tanker
+MMSI: 215489000, Ship Type: Cargo ship
+MMSI: 215685000, Ship Type: Tanker
+MMSI: 215698000, Ship Type: Tanker
+MMSI: 215908000, Ship Type: Cargo ship
+MMSI: 215926000, Ship Type: Ship type not found
+MMSI: 215933000, Ship Type: Tanker
+MMSI: 218005000, Ship Type: Cargo ship
+MMSI: 218007750, Ship Type: Cargo ship
+MMSI: 218016600, Ship Type: SAR
+MMSI: 218024950, Ship Type: Law enforcment
+MMSI: 218030270, Ship Type: Cargo ship
+MMSI: 218037430, Ship Type: Tug
+MMSI: 218041490, Ship Type: Cargo ship
+MMSI: 218085000, Ship Type: Tanker (HAZ-B)
+MMSI: 218162000, Ship Type: Fishing vessel
+MMSI: 218197000, Ship Type: Tug
+MMSI: 218321000, Ship Type: Tug
+MMSI: 218481000, Ship Type: Other type
+MMSI: 218601000, Ship Type: Other type
+MMSI: 218615000, Ship Type: Cargo ship
+MMSI: 218767000, Ship Type: Tug
+MMSI: 218795000, Ship Type: Passenger ship
+MMSI: 218805000, Ship Type: Cargo ship
+MMSI: 218816000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 218858000, Ship Type: Cargo ship
+MMSI: 219000177, Ship Type: Military ops
+MMSI: 219000178, Ship Type: Military ops
+MMSI: 219000179, Ship Type: Military ops
+MMSI: 219000195, Ship Type: Dredging or UW ops
+MMSI: 219000245, Ship Type: Cargo ship
+MMSI: 219000368, Ship Type: Passenger ship
+MMSI: 219000417, Ship Type: Military ops
+MMSI: 219000429, Ship Type: Passenger ship
+MMSI: 219000431, Ship Type: Passenger ship
+MMSI: 219000472, Ship Type: Military ops
+MMSI: 219000558, Ship Type: Other type
+MMSI: 219000577, Ship Type: Passenger ship
+MMSI: 219000584, Ship Type: Passenger ship
+MMSI: 219000603, Ship Type: Unknown
+MMSI: 219000604, Ship Type: Passenger ship
+MMSI: 219000606, Ship Type: Passenger ship
+MMSI: 219000615, Ship Type: Dredging or UW ops
+MMSI: 219000617, Ship Type: Fishing vessel
+MMSI: 219000632, Ship Type: Other type
+MMSI: 219000643, Ship Type: Passenger ship
+MMSI: 219000647, Ship Type: Other type
+MMSI: 219000674, Ship Type: Passenger ship
+MMSI: 219000675, Ship Type: Passenger ship
+MMSI: 219000733, Ship Type: Passenger ship
+MMSI: 219000734, Ship Type: Passenger ship
+MMSI: 219000742, Ship Type: Passenger ship
+MMSI: 219000775, Ship Type: SAR
+MMSI: 219000781, Ship Type: Passenger ship
+MMSI: 219000809, Ship Type: Passenger ship
+MMSI: 219000811, Ship Type: Passenger ship
+MMSI: 219000818, Ship Type: Passenger ship
+MMSI: 219000836, Ship Type: Passenger ship
+MMSI: 219000859, Ship Type: Passenger ship
+MMSI: 219000873, Ship Type: Passenger ship
+MMSI: 219000892, Ship Type: Dredging or UW ops
+MMSI: 219000895, Ship Type: Fishing vessel
+MMSI: 219000897, Ship Type: Fishing vessel
+MMSI: 219000899, Ship Type: Passenger ship
+MMSI: 219000988, Ship Type: Pleasure craft
+MMSI: 219001039, Ship Type: Fishing vessel
+MMSI: 219001125, Ship Type: Fishing vessel
+MMSI: 219001149, Ship Type: Fishing vessel
+MMSI: 219001181, Ship Type: Fishing vessel
+MMSI: 219001182, Ship Type: Passenger ship
+MMSI: 219001185, Ship Type: Passenger ship
+MMSI: 219001204, Ship Type: Fishing vessel
+MMSI: 219001259, Ship Type: Dredging or UW ops
+MMSI: 219001262, Ship Type: Dredging or UW ops
+MMSI: 219001265, Ship Type: Fishing vessel
+MMSI: 219001266, Ship Type: Passenger ship
+MMSI: 219001343, Ship Type: Fishing vessel
+MMSI: 219001362, Ship Type: Unknown
+MMSI: 219001375, Ship Type: Passenger ship
+MMSI: 219001431, Ship Type: Passenger ship
+MMSI: 219001514, Ship Type: Dredging or UW ops
+MMSI: 219001518, Ship Type: Fishing vessel
+MMSI: 219001522, Ship Type: Fishing vessel
+MMSI: 219001553, Ship Type: Fishing vessel
+MMSI: 219001587, Ship Type: Fishing vessel
+MMSI: 219001604, Ship Type: Fishing vessel
+MMSI: 219001642, Ship Type: Fishing vessel
+MMSI: 219001647, Ship Type: Other type
+MMSI: 219001678, Ship Type: Other type
+MMSI: 219001819, Ship Type: Dredging or UW ops
+MMSI: 219002023, Ship Type: Fishing vessel
+MMSI: 219002051, Ship Type: Fishing vessel
+MMSI: 219002136, Ship Type: Fishing vessel
+MMSI: 219002176, Ship Type: Pilot
+MMSI: 219002177, Ship Type: Passenger ship
+MMSI: 219002332, Ship Type: Pleasure craft
+MMSI: 219002416, Ship Type: Tug
+MMSI: 219002418, Ship Type: Passenger ship
+MMSI: 219002493, Ship Type: Dredging or UW ops
+MMSI: 219002565, Ship Type: Passenger ship
+MMSI: 219002661, Ship Type: Fishing vessel
+MMSI: 219002731, Ship Type: Passenger ship
+MMSI: 219002798, Ship Type: Unknown
+MMSI: 219002801, Ship Type: Towing vessel
+MMSI: 219002823, Ship Type: Fishing vessel
+MMSI: 219002827, Ship Type: Fishing vessel
+MMSI: 219002962, Ship Type: Fishing vessel
+MMSI: 219003121, Ship Type: Dredging or UW ops
+MMSI: 219003141, Ship Type: Passenger ship
+MMSI: 219003217, Ship Type: Cargo ship
+MMSI: 219003383, Ship Type: Cargo ship
+MMSI: 219003406, Ship Type: Tug
+MMSI: 219003446, Ship Type: Pleasure craft
+MMSI: 219003826, Ship Type: Pilot
+MMSI: 219003959, Ship Type: Fishing vessel
+MMSI: 219003966, Ship Type: Cargo ship
+MMSI: 219004128, Ship Type: Fishing vessel
+MMSI: 219004145, Ship Type: Passenger ship
+MMSI: 219004179, Ship Type: Other type
+MMSI: 219004203, Ship Type: Fishing vessel
+MMSI: 219004242, Ship Type: Fishing vessel
+MMSI: 219004265, Ship Type: Fishing vessel
+MMSI: 219004266, Ship Type: Other type
+MMSI: 219004343, Ship Type: Fishing vessel
+MMSI: 219004355, Ship Type: Tug
+MMSI: 219004407, Ship Type: Fishing vessel
+MMSI: 219004529, Ship Type: Tug
+MMSI: 219004596, Ship Type: Fishing vessel
+MMSI: 219004634, Ship Type: Pleasure craft
+MMSI: 219004907, Ship Type: Cargo ship
+MMSI: 219005068, Ship Type: Passenger ship
+MMSI: 219005454, Ship Type: Fishing vessel
+MMSI: 219005477, Ship Type: Pilot
+MMSI: 219005513, Ship Type: Fishing vessel
+MMSI: 219005574, Ship Type: Port tender
+MMSI: 219005583, Ship Type: Fishing vessel
+MMSI: 219005671, Ship Type: Fishing vessel
+MMSI: 219005732, Ship Type: Fishing vessel
+MMSI: 219005763, Ship Type: Fishing vessel
+MMSI: 219005803, Ship Type: Fishing vessel
+MMSI: 219005826, Ship Type: Fishing vessel
+MMSI: 219005866, Ship Type: Fishing vessel
+MMSI: 219005867, Ship Type: Fishing vessel
+MMSI: 219005878, Ship Type: Fishing vessel
+MMSI: 219005886, Ship Type: Other type
+MMSI: 219005901, Ship Type: Fishing vessel
+MMSI: 219005902, Ship Type: Fishing vessel
+MMSI: 219005909, Ship Type: Fishing vessel
+MMSI: 219005921, Ship Type: Fishing vessel
+MMSI: 219005929, Ship Type: Fishing vessel
+MMSI: 219005954, Ship Type: Fishing vessel
+MMSI: 219005956, Ship Type: Fishing vessel
+MMSI: 219005969, Ship Type: Fishing vessel
+MMSI: 219006026, Ship Type: Passenger ship
+MMSI: 219006092, Ship Type: Fishing vessel
+MMSI: 219006099, Ship Type: Port tender
+MMSI: 219006113, Ship Type: Fishing vessel
+MMSI: 219006219, Ship Type: Fishing vessel
+MMSI: 219006301, Ship Type: Fishing vessel
+MMSI: 219006304, Ship Type: Passenger ship
+MMSI: 219006382, Ship Type: Fishing vessel
+MMSI: 219006383, Ship Type: Fishing vessel
+MMSI: 219006389, Ship Type: Fishing vessel
+MMSI: 219006478, Ship Type: Pilot
+MMSI: 219006514, Ship Type: Sailing vessel
+MMSI: 219006614, Ship Type: Fishing vessel
+MMSI: 219006835, Ship Type: Fishing vessel
+MMSI: 219006971, Ship Type: Fishing vessel
+MMSI: 219007027, Ship Type: Fishing vessel
+MMSI: 219007034, Ship Type: Fishing vessel
+MMSI: 219007313, Ship Type: Fishing vessel
+MMSI: 219007363, Ship Type: Dredging or UW ops
+MMSI: 219007401, Ship Type: Pilot
+MMSI: 219007404, Ship Type: Fishing vessel
+MMSI: 219007421, Ship Type: Diving ops
+MMSI: 219007471, Ship Type: Port tender
+MMSI: 219007572, Ship Type: Dredging or UW ops
+MMSI: 219007596, Ship Type: Fishing vessel
+MMSI: 219007671, Ship Type: Tanker
+MMSI: 219007705, Ship Type: Cargo ship
+MMSI: 219007781, Ship Type: Fishing vessel
+MMSI: 219007835, Ship Type: Other type
+MMSI: 219007967, Ship Type: Fishing vessel
+MMSI: 219008474, Ship Type: Fishing vessel
+MMSI: 219008715, Ship Type: Fishing vessel
+MMSI: 219008746, Ship Type: Passenger ship
+MMSI: 219009081, Ship Type: Cargo ship
+MMSI: 219009101, Ship Type: Unknown
+MMSI: 219009183, Ship Type: Fishing vessel
+MMSI: 219009229, Ship Type: Fishing vessel
+MMSI: 219009367, Ship Type: Sailing vessel
+MMSI: 219009415, Ship Type: Fishing vessel
+MMSI: 219009799, Ship Type: Fishing vessel
+MMSI: 219010079, Ship Type: Fishing vessel
+MMSI: 219010207, Ship Type: Fishing vessel
+MMSI: 219010247, Ship Type: Fishing vessel
+MMSI: 219010487, Ship Type: Fishing vessel
+MMSI: 219010518, Ship Type: SAR
+MMSI: 219010873, Ship Type: Pilot
+MMSI: 219011018, Ship Type: Fishing vessel
+MMSI: 219011032, Ship Type: Fishing vessel
+MMSI: 219011224, Ship Type: Tug
+MMSI: 219011283, Ship Type: Cargo ship
+MMSI: 219011325, Ship Type: Fishing vessel
+MMSI: 219011348, Ship Type: Pleasure craft
+MMSI: 219011867, Ship Type: Fishing vessel
+MMSI: 219012073, Ship Type: Other type
+MMSI: 219012076, Ship Type: Towing vessel
+MMSI: 219012277, Ship Type: Passenger ship
+MMSI: 219012302, Ship Type: Fishing vessel
+MMSI: 219012332, Ship Type: Pleasure craft
+MMSI: 219012351, Ship Type: Fishing vessel
+MMSI: 219012352, Ship Type: Fishing vessel
+MMSI: 219012511, Ship Type: Fishing vessel
+MMSI: 219012521, Ship Type: Fishing vessel
+MMSI: 219012563, Ship Type: Tug
+MMSI: 219012671, Ship Type: Fishing vessel
+MMSI: 219013178, Ship Type: Fishing vessel
+MMSI: 219013485, Ship Type: Fishing vessel
+MMSI: 219013538, Ship Type: Fishing vessel
+MMSI: 219013667, Ship Type: Sailing vessel
+MMSI: 219013753, Ship Type: Fishing vessel
+MMSI: 219013885, Ship Type: Fishing vessel
+MMSI: 219013964, Ship Type: Dredging or UW ops
+MMSI: 219013968, Ship Type: Fishing vessel
+MMSI: 219013969, Ship Type: Pleasure craft
+MMSI: 219013976, Ship Type: Fishing vessel
+MMSI: 219014012, Ship Type: Passenger ship
+MMSI: 219014192, Ship Type: Fishing vessel
+MMSI: 219014219, Ship Type: Dredging or UW ops
+MMSI: 219014435, Ship Type: Other type
+MMSI: 219014436, Ship Type: Other type
+MMSI: 219014519, Ship Type: Pilot
+MMSI: 219014579, Ship Type: Passenger ship
+MMSI: 219014851, Ship Type: Fishing vessel
+MMSI: 219014974, Ship Type: Passenger ship
+MMSI: 219015055, Ship Type: Pleasure craft
+MMSI: 219015103, Ship Type: Fishing vessel
+MMSI: 219015127, Ship Type: Passenger ship
+MMSI: 219015153, Ship Type: Passenger ship
+MMSI: 219015233, Ship Type: Pleasure craft
+MMSI: 219015362, Ship Type: Fishing vessel
+MMSI: 219015425, Ship Type: Tug
+MMSI: 219015427, Ship Type: Tug
+MMSI: 219015579, Ship Type: Tug
+MMSI: 219015583, Ship Type: Pilot
+MMSI: 219015595, Ship Type: Unknown
+MMSI: 219015604, Ship Type: Port tender
+MMSI: 219016547, Ship Type: Passenger ship
+MMSI: 219016615, Ship Type: Fishing vessel
+MMSI: 219016663, Ship Type: HSC
+MMSI: 219016665, Ship Type: HSC
+MMSI: 219016667, Ship Type: Fishing vessel
+MMSI: 219016747, Ship Type: HSC
+MMSI: 219016759, Ship Type: SAR
+MMSI: 219016781, Ship Type: Pilot
+MMSI: 219016806, Ship Type: Fishing vessel
+MMSI: 219016832, Ship Type: Passenger ship
+MMSI: 219016847, Ship Type: Fishing vessel
+MMSI: 219016873, Ship Type: HSC
+MMSI: 219016906, Ship Type: Passenger ship
+MMSI: 219016938, Ship Type: Passenger ship
+MMSI: 219016966, Ship Type: Other type
+MMSI: 219017081, Ship Type: HSC
+MMSI: 219017147, Ship Type: Pleasure craft
+MMSI: 219017204, Ship Type: HSC
+MMSI: 219017288, Ship Type: Fishing vessel
+MMSI: 219017664, Ship Type: Passenger ship
+MMSI: 219017717, Ship Type: Passenger ship
+MMSI: 219017733, Ship Type: Towing vessel
+MMSI: 219017815, Ship Type: Passenger ship
+MMSI: 219017895, Ship Type: Fishing vessel
+MMSI: 219017917, Ship Type: Passenger ship
+MMSI: 219017993, Ship Type: Pleasure craft
+MMSI: 219018042, Ship Type: SAR
+MMSI: 219018044, Ship Type: HSC
+MMSI: 219018172, Ship Type: HSC
+MMSI: 219018493, Ship Type: SAR
+MMSI: 219018494, Ship Type: SAR
+MMSI: 219018788, Ship Type: Other type
+MMSI: 219018892, Ship Type: Fishing vessel
+MMSI: 219018986, Ship Type: Cargo ship (HAZ-D)
+MMSI: 219019010, Ship Type: SAR
+MMSI: 219019013, Ship Type: HSC
+MMSI: 219019067, Ship Type: Tanker
+MMSI: 219019173, Ship Type: Pleasure craft
+MMSI: 219019219, Ship Type: SAR
+MMSI: 219019354, Ship Type: Other type
+MMSI: 219019361, Ship Type: Pleasure craft
+MMSI: 219019441, Ship Type: Diving ops
+MMSI: 219019526, Ship Type: SAR
+MMSI: 219019887, Ship Type: Passenger ship
+MMSI: 219019936, Ship Type: Cargo ship
+MMSI: 219020142, Ship Type: Military ops
+MMSI: 219020398, Ship Type: Other type
+MMSI: 219020533, Ship Type: Other type
+MMSI: 219021176, Ship Type: Fishing vessel
+MMSI: 219021235, Ship Type: Other type
+MMSI: 219021343, Ship Type: Fishing vessel
+MMSI: 219021596, Ship Type: Law enforcment
+MMSI: 219022000, Ship Type: Fishing vessel
+MMSI: 219022047, Ship Type: Tanker
+MMSI: 219022214, Ship Type: Dredging or UW ops
+MMSI: 219022256, Ship Type: Pilot
+MMSI: 219022257, Ship Type: Pilot
+MMSI: 219022265, Ship Type: Tug
+MMSI: 219022300, Ship Type: Tug
+MMSI: 219022786, Ship Type: Pleasure craft
+MMSI: 219022903, Ship Type: HSC
+MMSI: 219023018, Ship Type: Sailing vessel
+MMSI: 219023313, Ship Type: Fishing vessel
+MMSI: 219023376, Ship Type: Pleasure craft
+MMSI: 219023531, Ship Type: Passenger ship
+MMSI: 219023588, Ship Type: Fishing vessel
+MMSI: 219023623, Ship Type: Pleasure craft
+MMSI: 219023648, Ship Type: Pilot
+MMSI: 219023738, Ship Type: Fishing vessel
+MMSI: 219023752, Ship Type: Pleasure craft
+MMSI: 219023780, Ship Type: Pleasure craft
+MMSI: 219023811, Ship Type: Pleasure craft
+MMSI: 219023833, Ship Type: Pilot
+MMSI: 219023834, Ship Type: Pilot
+MMSI: 219023911, Ship Type: Fishing vessel
+MMSI: 219023945, Ship Type: Pilot
+MMSI: 219024000, Ship Type: Fishing vessel
+MMSI: 219024175, Ship Type: Pilot
+MMSI: 219024176, Ship Type: Pilot
+MMSI: 219024178, Ship Type: Pilot
+MMSI: 219024185, Ship Type: Passenger ship
+MMSI: 219024563, Ship Type: Pleasure craft
+MMSI: 219024597, Ship Type: Tug
+MMSI: 219024604, Ship Type: Military ops
+MMSI: 219024651, Ship Type: Pleasure craft
+MMSI: 219024675, Ship Type: Pilot
+MMSI: 219024715, Ship Type: Fishing vessel
+MMSI: 219024728, Ship Type: Anti-polution
+MMSI: 219024783, Ship Type: Pilot
+MMSI: 219024784, Ship Type: Pilot
+MMSI: 219024923, Ship Type: Fishing vessel
+MMSI: 219024924, Ship Type: Fishing vessel
+MMSI: 219025245, Ship Type: Fishing vessel
+MMSI: 219025528, Ship Type: Tug
+MMSI: 219025774, Ship Type: Cargo ship
+MMSI: 219026000, Ship Type: Passenger ship (HAZ-A)
+MMSI: 219026048, Ship Type: Pleasure craft
+MMSI: 219026071, Ship Type: HSC
+MMSI: 219026119, Ship Type: Fishing vessel
+MMSI: 219026129, Ship Type: Pleasure craft
+MMSI: 219026147, Ship Type: Pilot
+MMSI: 219026172, Ship Type: Fishing vessel
+MMSI: 219026175, Ship Type: Sailing vessel
+MMSI: 219026197, Ship Type: Passenger ship
+MMSI: 219026257, Ship Type: Pilot
+MMSI: 219026261, Ship Type: HSC
+MMSI: 219026300, Ship Type: Passenger ship
+MMSI: 219026301, Ship Type: Passenger ship
+MMSI: 219026304, Ship Type: Passenger ship
+MMSI: 219026305, Ship Type: Passenger ship
+MMSI: 219026443, Ship Type: Pilot
+MMSI: 219026522, Ship Type: Cargo ship
+MMSI: 219026675, Ship Type: Fishing vessel
+MMSI: 219026706, Ship Type: Pilot
+MMSI: 219026899, Ship Type: Pleasure craft
+MMSI: 219027026, Ship Type: Fishing vessel
+MMSI: 219027298, Ship Type: HSC
+MMSI: 219027308, Ship Type: Dredging or UW ops
+MMSI: 219027309, Ship Type: Dredging or UW ops
+MMSI: 219027752, Ship Type: Fishing vessel
+MMSI: 219027790, Ship Type: Dredging or UW ops
+MMSI: 219027804, Ship Type: SAR
+MMSI: 219027893, Ship Type: Tug
+MMSI: 219027899, Ship Type: Tug
+MMSI: 219027995, Ship Type: Cargo ship
+MMSI: 219028021, Ship Type: Fishing vessel
+MMSI: 219028116, Ship Type: Passenger ship (HAZ-A)
+MMSI: 219028133, Ship Type: HSC
+MMSI: 219028337, Ship Type: Tug
+MMSI: 219028794, Ship Type: Fishing vessel
+MMSI: 219028973, Ship Type: HSC
+MMSI: 219029233, Ship Type: Passenger ship
+MMSI: 219029420, Ship Type: Sailing vessel
+MMSI: 219029468, Ship Type: Sailing vessel
+MMSI: 219029704, Ship Type: Unknown
+MMSI: 219029706, Ship Type: SAR
+MMSI: 219029708, Ship Type: SAR
+MMSI: 219029722, Ship Type: Tanker
+MMSI: 219029726, Ship Type: Other type (HAZ-A)
+MMSI: 219029769, Ship Type: Sailing vessel
+MMSI: 219029786, Ship Type: Other type
+MMSI: 219029904, Ship Type: Other type
+MMSI: 219030113, Ship Type: Tug
+MMSI: 219030243, Ship Type: Pleasure craft
+MMSI: 219030264, Ship Type: Pleasure craft
+MMSI: 219030294, Ship Type: Pleasure craft
+MMSI: 219030336, Ship Type: Ship type not found
+MMSI: 219030383, Ship Type: Fishing vessel
+MMSI: 219030406, Ship Type: Dredging or UW ops
+MMSI: 219030452, Ship Type: Fishing vessel
+MMSI: 219030533, Ship Type: Other type
+MMSI: 219030656, Ship Type: Pilot
+MMSI: 219030764, Ship Type: Sailing vessel
+MMSI: 219030973, Ship Type: Pleasure craft
+MMSI: 219031010, Ship Type: Pleasure craft
+MMSI: 219031087, Ship Type: Fishing vessel
+MMSI: 219031153, Ship Type: HSC
+MMSI: 219031157, Ship Type: HSC
+MMSI: 219031310, Ship Type: Passenger ship
+MMSI: 219031429, Ship Type: Tanker
+MMSI: 219031487, Ship Type: Ship type not found
+MMSI: 219031645, Ship Type: Unknown
+MMSI: 219031731, Ship Type: SAR
+MMSI: 219031740, Ship Type: Pleasure craft
+MMSI: 219031879, Ship Type: Pleasure craft
+MMSI: 219032276, Ship Type: Pleasure craft
+MMSI: 219032297, Ship Type: SAR
+MMSI: 219032310, Ship Type: Sailing vessel
+MMSI: 219032609, Ship Type: HSC
+MMSI: 219032621, Ship Type: Pleasure craft
+MMSI: 219032670, Ship Type: SAR
+MMSI: 219032869, Ship Type: Other type
+MMSI: 219032932, Ship Type: Tug
+MMSI: 219033013, Ship Type: Pilot
+MMSI: 219033166, Ship Type: HSC
+MMSI: 219033221, Ship Type: Other type
+MMSI: 219033720, Ship Type: Tug
+MMSI: 219034014, Ship Type: HSC
+MMSI: 219034249, Ship Type: Other type
+MMSI: 219034345, Ship Type: HSC
+MMSI: 219034486, Ship Type: Towing vessel
+MMSI: 219042000, Ship Type: SAR
+MMSI: 219063000, Ship Type: Fishing vessel
+MMSI: 219065000, Ship Type: Fishing vessel
+MMSI: 219076000, Ship Type: Ship type not found
+MMSI: 219106000, Ship Type: Fishing vessel
+MMSI: 219113000, Ship Type: Other type
+MMSI: 219136000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 219158000, Ship Type: Military ops
+MMSI: 219159000, Ship Type: Tug
+MMSI: 219164000, Ship Type: Cargo ship
+MMSI: 219171000, Ship Type: SAR
+MMSI: 219186000, Ship Type: SAR
+MMSI: 219203000, Ship Type: SAR
+MMSI: 219230000, Ship Type: Passenger ship
+MMSI: 219244000, Ship Type: Dredging or UW ops
+MMSI: 219262000, Ship Type: Military ops
+MMSI: 219281000, Ship Type: Cargo ship
+MMSI: 219298000, Ship Type: Dredging or UW ops
+MMSI: 219309000, Ship Type: Tanker
+MMSI: 219313000, Ship Type: Dredging or UW ops
+MMSI: 219329000, Ship Type: Cargo ship
+MMSI: 219330000, Ship Type: Fishing vessel
+MMSI: 219347000, Ship Type: Passenger ship
+MMSI: 219355000, Ship Type: Tanker
+MMSI: 219385000, Ship Type: Passenger ship
+MMSI: 219419000, Ship Type: Other type (HAZ-B)
+MMSI: 219421000, Ship Type: Fishing vessel
+MMSI: 219423000, Ship Type: Passenger ship
+MMSI: 219429000, Ship Type: Fishing vessel
+MMSI: 219435000, Ship Type: Cargo ship
+MMSI: 219439000, Ship Type: Fishing vessel
+MMSI: 219443000, Ship Type: Fishing vessel
+MMSI: 219448000, Ship Type: Other type
+MMSI: 219449000, Ship Type: Other type
+MMSI: 219461000, Ship Type: Dredging or UW ops
+MMSI: 219522000, Ship Type: Military ops
+MMSI: 219543000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 219551000, Ship Type: Cargo ship
+MMSI: 219560000, Ship Type: Passenger ship
+MMSI: 219570000, Ship Type: Other type
+MMSI: 219573000, Ship Type: Dredging or UW ops
+MMSI: 219581000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 219592000, Ship Type: Passenger ship
+MMSI: 219613000, Ship Type: Other type
+MMSI: 219622000, Ship Type: Passenger ship
+MMSI: 219670000, Ship Type: SAR
+MMSI: 219679000, Ship Type: Tug
+MMSI: 219709000, Ship Type: Fishing vessel
+MMSI: 219775000, Ship Type: Tanker
+MMSI: 219777000, Ship Type: Unknown
+MMSI: 219786000, Ship Type: Other type
+MMSI: 219787000, Ship Type: Fishing vessel
+MMSI: 219793000, Ship Type: Fishing vessel
+MMSI: 219796000, Ship Type: Fishing vessel
+MMSI: 219798000, Ship Type: Other type
+MMSI: 219801000, Ship Type: Fishing vessel
+MMSI: 219837000, Ship Type: Fishing vessel
+MMSI: 219849000, Ship Type: Tug
+MMSI: 219853000, Ship Type: Fishing vessel
+MMSI: 219868000, Ship Type: Fishing vessel
+MMSI: 219872000, Ship Type: Fishing vessel
+MMSI: 219904000, Ship Type: Fishing vessel
+MMSI: 219921000, Ship Type: Fishing vessel
+MMSI: 219922000, Ship Type: Fishing vessel
+MMSI: 219941000, Ship Type: Fishing vessel
+MMSI: 219945000, Ship Type: Passenger ship
+MMSI: 219948000, Ship Type: Fishing vessel
+MMSI: 219959000, Ship Type: Fishing vessel
+MMSI: 219965000, Ship Type: Dredging or UW ops
+MMSI: 219997000, Ship Type: Other type
+MMSI: 220000051, Ship Type: Fishing vessel
+MMSI: 220000054, Ship Type: Passenger ship
+MMSI: 220012000, Ship Type: Fishing vessel
+MMSI: 220024000, Ship Type: Fishing vessel
+MMSI: 220043000, Ship Type: Fishing vessel
+MMSI: 220046000, Ship Type: Fishing vessel
+MMSI: 220068000, Ship Type: Law enforcment
+MMSI: 220071000, Ship Type: Fishing vessel
+MMSI: 220135000, Ship Type: Fishing vessel
+MMSI: 220138000, Ship Type: Fishing vessel
+MMSI: 220181000, Ship Type: Other type
+MMSI: 220191000, Ship Type: Military ops
+MMSI: 220204000, Ship Type: Fishing vessel
+MMSI: 220205000, Ship Type: Fishing vessel
+MMSI: 220225000, Ship Type: Fishing vessel
+MMSI: 220242000, Ship Type: Fishing vessel
+MMSI: 220253000, Ship Type: Cargo ship
+MMSI: 220256000, Ship Type: Fishing vessel
+MMSI: 220257000, Ship Type: Fishing vessel
+MMSI: 220272000, Ship Type: Tug
+MMSI: 220278000, Ship Type: Fishing vessel
+MMSI: 220283000, Ship Type: Fishing vessel
+MMSI: 220295000, Ship Type: Fishing vessel
+MMSI: 220304000, Ship Type: Fishing vessel
+MMSI: 220307000, Ship Type: Fishing vessel
+MMSI: 220323000, Ship Type: Fishing vessel
+MMSI: 220329000, Ship Type: Fishing vessel
+MMSI: 220333000, Ship Type: Fishing vessel
+MMSI: 220334000, Ship Type: Fishing vessel
+MMSI: 220336000, Ship Type: Fishing vessel
+MMSI: 220339000, Ship Type: Fishing vessel
+MMSI: 220341000, Ship Type: Fishing vessel
+MMSI: 220343000, Ship Type: Fishing vessel
+MMSI: 220345000, Ship Type: Fishing vessel
+MMSI: 220349000, Ship Type: Fishing vessel
+MMSI: 220352000, Ship Type: Fishing vessel
+MMSI: 220368000, Ship Type: Fishing vessel
+MMSI: 220383000, Ship Type: Fishing vessel
+MMSI: 220431000, Ship Type: Military ops
+MMSI: 220432000, Ship Type: Military ops
+MMSI: 220435000, Ship Type: Military ops
+MMSI: 220446000, Ship Type: SAR
+MMSI: 220464000, Ship Type: Cargo ship
+MMSI: 220466000, Ship Type: Tug
+MMSI: 220476000, Ship Type: Tug
+MMSI: 220507000, Ship Type: Fishing vessel
+MMSI: 220544000, Ship Type: Fishing vessel
+MMSI: 220600000, Ship Type: Cargo ship
+MMSI: 220614000, Ship Type: Tanker
+MMSI: 220622000, Ship Type: Fishing vessel
+MMSI: 228467900, Ship Type: Cargo ship
+MMSI: 228468600, Ship Type: Cargo ship
+MMSI: 228468800, Ship Type: Cargo ship
+MMSI: 229084000, Ship Type: Tanker
+MMSI: 229399000, Ship Type: Ship type not found
+MMSI: 229476000, Ship Type: Tanker
+MMSI: 229673000, Ship Type: Tanker
+MMSI: 229697000, Ship Type: Cargo ship
+MMSI: 230039000, Ship Type: Cargo ship
+MMSI: 230042000, Ship Type: Cargo ship
+MMSI: 230091950, Ship Type: Cargo ship
+MMSI: 230179120, Ship Type: Fishing vessel
+MMSI: 230351000, Ship Type: Cargo ship
+MMSI: 230357000, Ship Type: Cargo ship
+MMSI: 230617000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 230631000, Ship Type: Cargo ship (HAZ-D)
+MMSI: 230643000, Ship Type: Cargo ship (HAZ-B)
+MMSI: 230688000, Ship Type: Tanker
+MMSI: 230695000, Ship Type: Cargo ship
+MMSI: 230696000, Ship Type: Cargo ship
+MMSI: 230707000, Ship Type: Tanker
+MMSI: 230709000, Ship Type: Cargo ship
+MMSI: 230712000, Ship Type: Cargo ship
+MMSI: 230719000, Ship Type: Cargo ship
+MMSI: 230941700, Ship Type: Other type
+MMSI: 230982000, Ship Type: Passenger ship
+MMSI: 230987000, Ship Type: Passenger ship
+MMSI: 230995000, Ship Type: Ship type not found
+MMSI: 231025000, Ship Type: Cargo ship
+MMSI: 231048000, Ship Type: Cargo ship
+MMSI: 231123000, Ship Type: Cargo ship
+MMSI: 231336000, Ship Type: Dredging or UW ops
+MMSI: 231355000, Ship Type: Cargo ship (HAZ-B)
+MMSI: 231613000, Ship Type: Cargo ship
+MMSI: 231846000, Ship Type: Tug
+MMSI: 231848000, Ship Type: Tug
+MMSI: 231852000, Ship Type: Ship type not found
+MMSI: 231859000, Ship Type: Tug
+MMSI: 231860000, Ship Type: Cargo ship
+MMSI: 231884000, Ship Type: Tanker
+MMSI: 232003652, Ship Type: Pilot
+MMSI: 232008636, Ship Type: Tug
+MMSI: 232008874, Ship Type: Other type
+MMSI: 232024313, Ship Type: HSC
+MMSI: 232025009, Ship Type: Cargo ship
+MMSI: 232025959, Ship Type: HSC
+MMSI: 232031538, Ship Type: Cargo ship
+MMSI: 232035207, Ship Type: Cargo ship
+MMSI: 232046091, Ship Type: HSC
+MMSI: 232046826, Ship Type: Cargo ship (HAZ-A)
+MMSI: 232049178, Ship Type: Cargo ship
+MMSI: 232053416, Ship Type: Cargo ship
+MMSI: 235003400, Ship Type: Other type
+MMSI: 235003431, Ship Type: Pilot
+MMSI: 235007860, Ship Type: Fishing vessel
+MMSI: 235009900, Ship Type: Military ops
+MMSI: 235074473, Ship Type: Pleasure craft
+MMSI: 235091458, Ship Type: HSC
+MMSI: 235098061, Ship Type: Tanker
+MMSI: 235102532, Ship Type: Ship type not found
+MMSI: 235106475, Ship Type: Ship type not found
+MMSI: 235108458, Ship Type: Other type
+MMSI: 235108711, Ship Type: HSC
+MMSI: 235112981, Ship Type: Tanker
+MMSI: 235116828, Ship Type: Port tender
+MMSI: 235500000, Ship Type: Cargo ship
+MMSI: 236111791, Ship Type: Tanker
+MMSI: 236111849, Ship Type: Tug
+MMSI: 236385000, Ship Type: Tanker (HAZ-B)
+MMSI: 238265000, Ship Type: Tanker (HAZ-B)
+MMSI: 240168000, Ship Type: Tanker
+MMSI: 241798000, Ship Type: Cargo ship
+MMSI: 244017000, Ship Type: Cargo ship
+MMSI: 244020613, Ship Type: Sailing vessel
+MMSI: 244086000, Ship Type: Dredging or UW ops
+MMSI: 244090800, Ship Type: Cargo ship
+MMSI: 244110823, Ship Type: Cargo ship
+MMSI: 244120000, Ship Type: Tug
+MMSI: 244131000, Ship Type: Fishing vessel
+MMSI: 244140000, Ship Type: Cargo ship
+MMSI: 244140468, Ship Type: Cargo ship
+MMSI: 244165000, Ship Type: Fishing vessel
+MMSI: 244251000, Ship Type: Military ops
+MMSI: 244267000, Ship Type: Tanker (HAZ-A)
+MMSI: 244271000, Ship Type: Cargo ship
+MMSI: 244321000, Ship Type: Cargo ship
+MMSI: 244335000, Ship Type: Tanker
+MMSI: 244338000, Ship Type: Unknown
+MMSI: 244468000, Ship Type: Tug
+MMSI: 244475000, Ship Type: Tug
+MMSI: 244519000, Ship Type: Cargo ship
+MMSI: 244533000, Ship Type: Tug
+MMSI: 244554000, Ship Type: Cargo ship
+MMSI: 244575000, Ship Type: Cargo ship
+MMSI: 244597000, Ship Type: Cargo ship (HAZ-B)
+MMSI: 244615184, Ship Type: Cargo ship
+MMSI: 244632000, Ship Type: Cargo ship
+MMSI: 244641000, Ship Type: Dredging or UW ops
+MMSI: 244647000, Ship Type: Dredging or UW ops
+MMSI: 244675000, Ship Type: Cargo ship
+MMSI: 244678000, Ship Type: Tanker (HAZ-D)
+MMSI: 244686000, Ship Type: Fishing vessel
+MMSI: 244710825, Ship Type: Fishing vessel
+MMSI: 244723000, Ship Type: Dredging or UW ops
+MMSI: 244750595, Ship Type: Cargo ship
+MMSI: 244750806, Ship Type: Other type
+MMSI: 244768000, Ship Type: Cargo ship
+MMSI: 244790715, Ship Type: Cargo ship
+MMSI: 244830818, Ship Type: Cargo ship
+MMSI: 244831000, Ship Type: Cargo ship
+MMSI: 244834000, Ship Type: Port tender
+MMSI: 244850116, Ship Type: Cargo ship
+MMSI: 244860325, Ship Type: Unknown
+MMSI: 244870189, Ship Type: Cargo ship
+MMSI: 244870327, Ship Type: Dredging or UW ops
+MMSI: 244870420, Ship Type: Cargo ship
+MMSI: 244870428, Ship Type: Tanker
+MMSI: 244890000, Ship Type: Tug
+MMSI: 244890472, Ship Type: Cargo ship
+MMSI: 244901000, Ship Type: Cargo ship
+MMSI: 244915000, Ship Type: HSC
+MMSI: 244997000, Ship Type: Cargo ship
+MMSI: 245029000, Ship Type: Cargo ship
+MMSI: 245043000, Ship Type: Dredging or UW ops
+MMSI: 245176000, Ship Type: Cargo ship
+MMSI: 245235000, Ship Type: Fishing vessel
+MMSI: 245241000, Ship Type: Cargo ship
+MMSI: 245250000, Ship Type: Cargo ship
+MMSI: 245257000, Ship Type: Cargo ship
+MMSI: 245258000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 245281000, Ship Type: Cargo ship
+MMSI: 245286000, Ship Type: Tanker
+MMSI: 245313000, Ship Type: Tanker
+MMSI: 245341000, Ship Type: Fishing vessel
+MMSI: 245404000, Ship Type: Tug
+MMSI: 245489000, Ship Type: Tug
+MMSI: 245618000, Ship Type: Dredging or UW ops
+MMSI: 245693000, Ship Type: Tug
+MMSI: 245808000, Ship Type: Other type
+MMSI: 245809000, Ship Type: Other type
+MMSI: 245871000, Ship Type: Cargo ship
+MMSI: 245875000, Ship Type: Tug
+MMSI: 245901000, Ship Type: Cargo ship
+MMSI: 245909000, Ship Type: Cargo ship
+MMSI: 245918000, Ship Type: Cargo ship
+MMSI: 245939000, Ship Type: Military ops
+MMSI: 246058000, Ship Type: Dredging or UW ops
+MMSI: 246110000, Ship Type: Cargo ship
+MMSI: 246135000, Ship Type: Fishing vessel
+MMSI: 246179000, Ship Type: Cargo ship
+MMSI: 246184000, Ship Type: Fishing vessel
+MMSI: 246191000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 246265000, Ship Type: Cargo ship
+MMSI: 246320000, Ship Type: Cargo ship
+MMSI: 246338000, Ship Type: Fishing vessel
+MMSI: 246371000, Ship Type: Cargo ship
+MMSI: 246389000, Ship Type: Towing vessel
+MMSI: 246443000, Ship Type: Cargo ship
+MMSI: 246497000, Ship Type: Cargo ship
+MMSI: 246512000, Ship Type: Cargo ship
+MMSI: 246539000, Ship Type: Cargo ship
+MMSI: 246575000, Ship Type: Dredging or UW ops
+MMSI: 246606000, Ship Type: Cargo ship
+MMSI: 246607000, Ship Type: Tug
+MMSI: 246625000, Ship Type: Cargo ship
+MMSI: 246669000, Ship Type: Cargo ship
+MMSI: 246670000, Ship Type: Cargo ship
+MMSI: 246702000, Ship Type: Tug
+MMSI: 246724000, Ship Type: Cargo ship
+MMSI: 246754000, Ship Type: Cargo ship
+MMSI: 246774000, Ship Type: Tug
+MMSI: 246818000, Ship Type: Other type
+MMSI: 246819000, Ship Type: Unknown
+MMSI: 246843000, Ship Type: Cargo ship
+MMSI: 246855000, Ship Type: Cargo ship
+MMSI: 246925000, Ship Type: Tug
+MMSI: 246970000, Ship Type: Tanker
+MMSI: 246993000, Ship Type: Cargo ship
+MMSI: 246996000, Ship Type: Cargo ship
+MMSI: 247018700, Ship Type: Cargo ship
+MMSI: 247153600, Ship Type: Ship type not found
+MMSI: 247386800, Ship Type: Cargo ship
+MMSI: 247389200, Ship Type: Passenger ship
+MMSI: 248020000, Ship Type: Tanker
+MMSI: 248221000, Ship Type: Tanker (HAZ-B)
+MMSI: 248483000, Ship Type: Tanker (HAZ-B)
+MMSI: 248693000, Ship Type: Tanker
+MMSI: 248789000, Ship Type: Cargo ship
+MMSI: 248886000, Ship Type: Tanker (HAZ-B)
+MMSI: 248891000, Ship Type: Tanker
+MMSI: 248971000, Ship Type: Ship type not found
+MMSI: 249127000, Ship Type: Dredging or UW ops
+MMSI: 249393000, Ship Type: Ship type not found
+MMSI: 249934000, Ship Type: Cargo ship
+MMSI: 250005981, Ship Type: Cargo ship
+MMSI: 253778000, Ship Type: Ship type not found
+MMSI: 255724000, Ship Type: Cargo ship
+MMSI: 255735000, Ship Type: Tanker (HAZ-A)
+MMSI: 255769000, Ship Type: Cargo ship
+MMSI: 255801580, Ship Type: Cargo ship
+MMSI: 255802270, Ship Type: Ship type not found
+MMSI: 255802540, Ship Type: Cargo ship
+MMSI: 255802570, Ship Type: Cargo ship
+MMSI: 255802840, Ship Type: Cargo ship
+MMSI: 255802940, Ship Type: Tanker
+MMSI: 255802950, Ship Type: Tanker
+MMSI: 255803560, Ship Type: Tanker
+MMSI: 255803870, Ship Type: Other type
+MMSI: 255805589, Ship Type: Cargo ship
+MMSI: 255805653, Ship Type: Cargo ship
+MMSI: 255805672, Ship Type: Cargo ship
+MMSI: 255805880, Ship Type: Other type
+MMSI: 255805899, Ship Type: Cargo ship (HAZ-A)
+MMSI: 255806024, Ship Type: Tanker
+MMSI: 255806151, Ship Type: Tanker (HAZ-B)
+MMSI: 255806190, Ship Type: Cargo ship (HAZ-A)
+MMSI: 255806196, Ship Type: Tanker
+MMSI: 255806258, Ship Type: Cargo ship
+MMSI: 255806303, Ship Type: Tanker
+MMSI: 255806310, Ship Type: Cargo ship
+MMSI: 255806328, Ship Type: Cargo ship
+MMSI: 255806364, Ship Type: Cargo ship
+MMSI: 255806370, Ship Type: Cargo ship (HAZ-B)
+MMSI: 255806440, Ship Type: Ship type not found
+MMSI: 255806471, Ship Type: Cargo ship
+MMSI: 255806476, Ship Type: Cargo ship
+MMSI: 255808000, Ship Type: Cargo ship
+MMSI: 255814000, Ship Type: Cargo ship (HAZ-A)
+MMSI: 255815000, Ship Type: Cargo ship (HAZ-D)
+MMSI: 255915569, Ship Type: Cargo ship
+MMSI: 255915582, Ship Type: Cargo ship
+MMSI: 255915583, Ship Type: Cargo ship
+MMSI: 255915584, Ship Type: Cargo ship
+MMSI: 255915598, Ship Type: Cargo ship
+MMSI: 255915649, Ship Type: Tanker
+MMSI: 255915668, Ship Type: Cargo ship
+MMSI: 255915675, Ship Type: Ship type not found
+MMSI: 255915683, Ship Type: Cargo ship
+MMSI: 255915748, Ship Type: Cargo ship
+MMSI: 255915769, Ship Type: Tug
+MMSI: 255915940, Ship Type: Towing vessel
+MMSI: 255915951, Ship Type: Cargo ship
+MMSI: 256336000, Ship Type: Cargo ship
+MMSI: 256591000, Ship Type: Cargo ship
+MMSI: 256617000, Ship Type: Cargo ship
+MMSI: 256683000, Ship Type: Cargo ship
+MMSI: 256717000, Ship Type: Tanker
+MMSI: 256956000, Ship Type: Cargo ship
+MMSI: 256959000, Ship Type: Tanker
+MMSI: 257058100, Ship Type: Pleasure craft
+MMSI: 257064430, Ship Type: Cargo ship
+MMSI: 257071710, Ship Type: Cargo ship
+MMSI: 257076220, Ship Type: Cargo ship
+MMSI: 257076850, Ship Type: Cargo ship
+MMSI: 257180000, Ship Type: Unknown
+MMSI: 257182000, Ship Type: Passenger ship (HAZ-A)
+MMSI: 257203000, Ship Type: Cargo ship
+MMSI: 257206000, Ship Type: Tanker
+MMSI: 257207000, Ship Type: Cargo ship
+MMSI: 257221000, Ship Type: Cargo ship
+MMSI: 257306000, Ship Type: Cargo ship
+MMSI: 257314000, Ship Type: Cargo ship
+MMSI: 257339000, Ship Type: Cargo ship
+MMSI: 257341000, Ship Type: Other type
+MMSI: 257358000, Ship Type: Tanker
+MMSI: 257374000, Ship Type: Tanker (HAZ-C)
+MMSI: 257461000, Ship Type: Tug
+MMSI: 257475000, Ship Type: Cargo ship
+MMSI: 257643000, Ship Type: Tanker
+MMSI: 257736000, Ship Type: Military ops
+MMSI: 257737000, Ship Type: Cargo ship
+MMSI: 257759000, Ship Type: Other type
+MMSI: 257769000, Ship Type: Other type
+MMSI: 257840000, Ship Type: Tanker
+MMSI: 257859000, Ship Type: Cargo ship
+MMSI: 257861000, Ship Type: Ship type not found
+MMSI: 257896000, Ship Type: Unknown
+MMSI: 257898500, Ship Type: Fishing vessel
+MMSI: 257964000, Ship Type: Cargo ship
+MMSI: 257970000, Ship Type: Tanker
+MMSI: 258006930, Ship Type: Cargo ship
+MMSI: 258009780, Ship Type: Cargo ship
+MMSI: 258035000, Ship Type: Ship type not found
+MMSI: 258059000, Ship Type: Cargo ship
+MMSI: 258092000, Ship Type: Passenger ship
+MMSI: 258152000, Ship Type: Tanker
+MMSI: 258159000, Ship Type: Cargo ship
+MMSI: 258313000, Ship Type: Tug
+MMSI: 258349500, Ship Type: Unknown
+MMSI: 258430000, Ship Type: Tanker
+MMSI: 258498000, Ship Type: Fishing vessel
+MMSI: 258542000, Ship Type: Fishing vessel
+MMSI: 258648000, Ship Type: Cargo ship
