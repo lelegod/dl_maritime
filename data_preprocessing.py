@@ -76,10 +76,41 @@ for (mmsi, seg), g in df.groupby(["MMSI", "Segment"], observed=True):
 df_clean = pd.concat(results).reset_index()
 print("Before deleting", len(df_clean))
 missing = df_clean[df_clean[["SOG", "COG", "Latitude", "Longtitude"]].isna().any(axis=1)]
+unique_mmsi_total = missing["MMSI"].nunique()
+
+mmsi_ids_missing = missing["MMSI"].unique()
+print("MMSI IDs with missing data:")
+print(mmsi_ids_missing)
+
+
+print("Unique MMSI in full dataset:", unique_mmsi_total)
 print(f"Missing numeric data rows: {len(missing)}")
 # Removing rows with empty data approximately 6%
 df_clean = df_clean.dropna(subset=["SOG", "COG", "Latitude", "Longtitude", "MMSI", "Segment"])
 print("After deleting", len(df_clean))
+
+print((df_clean.groupby(["MMSI","Segment"])["Timestamp"]
+   .diff().dt.total_seconds().div(60)
+   .max() > 5).any())
+
+
+# GAP_TOLERANCE_MIN = 5  # you can lower to 2–3 if you want stricter continuity
+#
+# df_clean = df_clean.sort_values(["MMSI", "Timestamp"]).reset_index(drop=True)
+# new_segments = []
+#
+# for mmsi, g in df_clean.groupby("MMSI", observed=True):
+#     g["time_diff"] = g["Timestamp"].diff().dt.total_seconds().fillna(0)
+#     g["Segment_new"] = (g["time_diff"] > GAP_TOLERANCE_MIN * 60).cumsum() + 1
+#     new_segments.append(g)
+#
+# df_clean = pd.concat(new_segments, ignore_index=True)
+# df_clean.drop(columns=["time_diff"], inplace=True)
+# df_clean.rename(columns={"Segment_new": "Segment"}, inplace=True)
+# assert not (df_clean.groupby(["MMSI","Segment"])["Timestamp"]
+#             .diff().dt.total_seconds().div(60).gt(5).any()), \
+#             "Some gaps >5min still exist"
+
 df_clean.to_csv(OUTPUT_PATH, index=False)
 
 print(f"Cleaned 1-minute AIS data saved to: {OUTPUT_PATH}")

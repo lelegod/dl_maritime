@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import folium
 
 def create_mmsi_dict_from_file(file_path):
@@ -81,3 +82,21 @@ def plot_ship_trajectory(df, mmsi, save_path=None):
         print(f"Map saved to {save_path}")
 
     return m
+    
+def haversine_m(lat1, lon1, lat2, lon2):
+    R = 6371000.0
+    lat1, lon1, lat2, lon2 = map(np.deg2rad, [lat1, lon1, lat2, lon2])
+    dlat, dlon = lat2 - lat1, lon2 - lon1
+    a = np.sin(dlat/2)**2 + np.cos(lat1)*np.cos(lat2)*np.sin(dlon/2)**2
+    return 2 * R * np.arcsin(np.sqrt(a))
+
+# --- Segment and renumber per MMSI
+def segment_and_renumber(df, GAP_BREAK_MIN):
+    segmented = []
+    for mmsi, g in df.groupby("MMSI", observed=True):
+        g = g.sort_values("Timestamp").reset_index(drop=True)
+        dt = g["Timestamp"].diff().dt.total_seconds().fillna(0)
+        seg_raw = (dt > GAP_BREAK_MIN * 60).cumsum()
+        g["Segment"] = seg_raw - seg_raw.min() + 1
+        segmented.append(g)
+    return pd.concat(segmented, ignore_index=True)
