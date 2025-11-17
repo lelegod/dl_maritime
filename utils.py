@@ -101,9 +101,9 @@ def segment_and_renumber(df, GAP_BREAK_MIN):
         segmented.append(g)
     return pd.concat(segmented, ignore_index=True)
 
-def find_stationary_ships(df, radius_threshold=1000, speed_threshold=2.0):
+def filter_stationary_ships(df, radius_threshold=1000, speed_threshold=2.0):
     """
-    Finds MMSIs that remain within a small area and never exceed a given speed.
+    Removes ships that remain within a small area and never exceed a given speed.
     
     Parameters
     ----------
@@ -116,8 +116,8 @@ def find_stationary_ships(df, radius_threshold=1000, speed_threshold=2.0):
     
     Returns
     -------
-    list of int
-        MMSIs classified as stationary.
+    pd.DataFrame
+        A cleaned DataFrame with stationary ships removed.
     """
     stationary_mmsi = []
 
@@ -125,14 +125,18 @@ def find_stationary_ships(df, radius_threshold=1000, speed_threshold=2.0):
         mean_lat = group["Latitude"].mean()
         mean_lon = group["Longtitude"].mean()
         
-        # Max distance from mean location
         distances = haversine_m(group["Latitude"], group["Longtitude"], mean_lat, mean_lon)
         max_dist = distances.max()
-        
         max_speed = group["SOG"].max()
 
         if max_dist < radius_threshold and max_speed < speed_threshold:
             stationary_mmsi.append(mmsi)
 
     print(f"Found {len(stationary_mmsi)} stationary ships out of {df['MMSI'].nunique()}.")
-    return stationary_mmsi
+
+    # Return df with stationary ships removed
+    df_clean = df[~df["MMSI"].isin(stationary_mmsi)].copy()
+
+    print(f"Cleaned DF contains {df_clean['MMSI'].nunique()} ships.")
+    return df_clean
+
