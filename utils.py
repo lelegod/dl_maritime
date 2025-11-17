@@ -100,3 +100,39 @@ def segment_and_renumber(df, GAP_BREAK_MIN):
         g["Segment"] = seg_raw - seg_raw.min() + 1
         segmented.append(g)
     return pd.concat(segmented, ignore_index=True)
+
+def find_stationary_ships(df, radius_threshold=1000, speed_threshold=2.0):
+    """
+    Finds MMSIs that remain within a small area and never exceed a given speed.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Must include ['MMSI', 'Latitude', 'Longtitude', 'SOG'] columns.
+    radius_threshold : float
+        Maximum radius (m) around mean position to consider stationary.
+    speed_threshold : float
+        Maximum SOG (knots) allowed for stationary ships.
+    
+    Returns
+    -------
+    list of int
+        MMSIs classified as stationary.
+    """
+    stationary_mmsi = []
+
+    for mmsi, group in df.groupby("MMSI"):
+        mean_lat = group["Latitude"].mean()
+        mean_lon = group["Longtitude"].mean()
+        
+        # Max distance from mean location
+        distances = haversine_m(group["Latitude"], group["Longtitude"], mean_lat, mean_lon)
+        max_dist = distances.max()
+        
+        max_speed = group["SOG"].max()
+
+        if max_dist < radius_threshold and max_speed < speed_threshold:
+            stationary_mmsi.append(mmsi)
+
+    print(f"Found {len(stationary_mmsi)} stationary ships out of {df['MMSI'].nunique()}.")
+    return stationary_mmsi
