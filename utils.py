@@ -140,3 +140,75 @@ def filter_stationary_ships(df, radius_threshold=1000, speed_threshold=2.0):
     print(f"Cleaned DF contains {df_clean['MMSI'].nunique()} ships.")
     return df_clean
 
+def plot_ship_trajectory_with_prediction(df_obs, df_pred, mmsi, save_path=None):
+    """
+    Plots both observed and predicted trajectories for a ship.
+
+    Parameters
+    ----------
+    df_obs : pd.DataFrame
+        Observed data containing ['MMSI', 'Latitude', 'Longtitude'].
+    df_pred : pd.DataFrame
+        Predicted data containing ['MMSI', 'Latitude', 'Longtitude'].
+    mmsi : int or str
+        MMSI of the ship.
+    save_path : str, optional
+        Output path for HTML map.
+
+    Returns
+    -------
+    folium.Map
+    """
+
+    # Filter observed data
+    df_obs_ship = df_obs[df_obs['MMSI'] == mmsi].sort_values('Timestamp')
+    if df_obs_ship.empty:
+        print(f"No observed data found for MMSI {mmsi}.")
+        return None
+
+    # Filter predicted data
+    df_pred_ship = df_pred[df_pred['MMSI'] == mmsi].sort_values('Timestamp')
+    if df_pred_ship.empty:
+        print(f"No predicted data found for MMSI {mmsi}.")
+        return None
+
+    # Compute map center from observed data
+    center_lat = df_obs_ship['Latitude'].mean()
+    center_lon = df_obs_ship['Longtitude'].mean()
+
+    # Create folium map
+    m = folium.Map(location=[center_lat, center_lon], zoom_start=6)
+
+    # Observed trajectory
+    obs_coords = list(zip(df_obs_ship['Latitude'], df_obs_ship['Longtitude']))
+    folium.PolyLine(obs_coords, color="blue", weight=3, opacity=0.9,
+                    tooltip="Observed Trajectory").add_to(m)
+
+    # Predicted trajectory
+    pred_coords = list(zip(df_pred_ship['Latitude'], df_pred_ship['Longtitude']))
+    folium.PolyLine(pred_coords, color="green", weight=3, opacity=0.9,
+                    tooltip="Predicted Trajectory").add_to(m)
+
+    # Markers for observed points
+    for _, row in df_obs_ship.iterrows():
+        folium.CircleMarker(
+            location=[row['Latitude'], row['Longtitude']],
+            radius=2,
+            color='blue',
+            fill=True
+        ).add_to(m)
+
+    # Optional markers for predicted points (commented out)
+    for _, row in df_pred_ship.iterrows():
+        folium.CircleMarker(
+            location=[row['Latitude'], row['Longtitude']],
+            radius=2,
+            color='green',
+            fill=True
+        ).add_to(m)
+
+    if save_path:
+        m.save(save_path)
+        print(f"Map saved to {save_path}")
+
+    return m
