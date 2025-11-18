@@ -556,78 +556,106 @@ def predict_sample(idx):
     return coords
 
 def predict_sample_autoregressive(idx):
-    """Autoregressive prediction: each next step uses previous predictions."""
+    """Autoregressive prediction using ALL physics-aware features."""
 
-    # Load checkpoint
     ckpt = torch.load("ais_model_final.pth", map_location=DEVICE, weights_only=False)
 
     meta = ckpt["meta"]
     X = ckpt["X"]
     segment_scalers = ckpt["segment_scalers"]
 
-    # Extract scaler for this segment
+    # Extract scalers for this segment
     mmsi = int(meta.loc[idx, "mmsi"])
-    seg  = int(meta.loc[idx, "segment"])
+    seg = int(meta.loc[idx, "segment"])
     scaler_X, scaler_y = segment_scalers[(mmsi, seg)]
 
-    # Load model
+    # Load the model
     model = AISTransformer(input_size=len(FEATURES)).to(DEVICE)
     model.load_state_dict(ckpt["model_state"])
     model.eval()
 
-    # Initial window (already scaled: shape (WINDOW, FEATURES))
+    # Initial scaled window
     window = X[idx].copy()
 
-    # last observed actual coordinates
-    cur_lat = float(meta.loc[idx, "last_lat"])
-    cur_lon = float(meta.loc[idx, "last_lon"])
+    # Last observed actual coordinates
+    prev_lat = float(meta.loc[idx, "last_lat"])
+    prev_lon = float(meta.loc[idx, "last_lon"])
+
+    # Extract last feature values (scaled → inverse scaled)
+    last_feat_scaled = window[-1]
+    last_feat = scaler_X.inverse_transform(last_feat_scaled.reshape(1, -1))[0]
+
+    prev_SOG = last_feat[2]
+    prev_COG = last_feat[3]
 
     pred_coords = []
 
     with torch.no_grad():
         for _ in range(HORIZON):
 
-            # Model input shape: (1, WINDOW, FEATURES)
+            # Model input
             x = torch.tensor(window[np.newaxis, ...], dtype=torch.float32).to(DEVICE)
 
-            # Encode and decode 1-step prediction
-            z = model(x)                             # (1, embed_size)
-            delta_scaled = model.decoder(z)[0].cpu().numpy()  # (2,)
+            # Predict Δlat, Δlon (scaled)
+            z = model(x)
+            delta_scaled = model.decoder(z)[0].cpu().numpy()
 
-            # Convert predicted scaled delta → real delta
+            # Inverse-transform deltas
             delta_real = scaler_y.inverse_transform(delta_scaled.reshape(1, -1))[0]
+            dlat, dlon = delta_real
 
             # Update coordinates
-            cur_lat += delta_real[0]
-            cur_lon += delta_real[1]
-
+            cur_lat = prev_lat + dlat
+            cur_lon = prev_lon + dlon
             pred_coords.append([cur_lat, cur_lon])
 
-            # Build a full feature row using predicted lat/lon + previous feature values
-            last_feat = window[-1]
+            # ------- UPDATE ALL PHYSICS-AWARE FEATURES -------
 
+            # 1. Compute distance travelled (meters)
+            dist_m = haversine(prev_lat, prev_lon, cur_lat, cur_lon)
+
+            # 2. Compute new SOG (speed over ground)
+            SOG = dist_m / 60.0  # AIS = 60 sec interval
+
+            # 3. Compute new COG (direction)
+            dY = cur_lat - prev_lat
+            dX = cur_lon - prev_lon
+            COG = (np.degrees(np.arctan2(dX, dY)) + 360) % 360
+
+            # 4. vx, vy: velocity vector components
+            vx = SOG * np.cos(np.radians(COG))
+            vy = SOG * np.sin(np.radians(COG))
+
+            # 5. dSOG and dCOG (accelerations)
+            dSOG = SOG - prev_SOG
+            dCOG = (COG - prev_COG + 540) % 360 - 180  # normalize turn rate
+
+            # New raw feature row (unscaled)
             new_row = {
                 "Latitude": cur_lat,
                 "Longtitude": cur_lon,
-                "SOG": last_feat[2],  # keep previous speed
-                "COG": last_feat[3],  # keep previous heading
-                "vx": last_feat[4],
-                "vy": last_feat[5],
-                "dSOG": last_feat[6],
-                "dCOG": last_feat[7]
+                "SOG": SOG,
+                "COG": COG,
+                "vx": vx,
+                "vy": vy,
+                "dSOG": dSOG,
+                "dCOG": dCOG
             }
 
-            # Convert to a proper DataFrame with ALL feature columns
+            # Prepare DataFrame in correct feature order
             temp_df = pd.DataFrame([[new_row[f] for f in FEATURES]], columns=FEATURES)
 
-            # Scale the full feature row
-            temp_scaled = scaler_X.transform(temp_df)[0]
+            # Scale new row for next window
+            new_scaled = scaler_X.transform(temp_df)[0]
 
-            # Update the window with the new scaled feature row
-            window = np.vstack([window[1:], temp_scaled])
+            # Slide window
+            window = np.vstack([window[1:], new_scaled])
+
+            # Update prev state
+            prev_lat, prev_lon = cur_lat, cur_lon
+            prev_SOG, prev_COG = SOG, COG
 
     return np.array(pred_coords)
-
 
 
 import folium
