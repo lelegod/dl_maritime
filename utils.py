@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import folium
+import torch
 
 def create_mmsi_dict_from_file(file_path):
     mmsi_type_dict = {}
@@ -304,3 +305,42 @@ def prepare_training_data(df, sequence_length, features, target_features, min_se
     y = np.concatenate(y_all, axis=0)
     
     return X, y, segment_info
+
+# Function for iterative prediction
+def iterative_predict(model, initial_sequence, n_steps, scaler_X, scaler_y, device):
+    """
+    Perform multi-step iterative prediction.
+    
+    Args:
+        model: Trained GRU model
+        initial_sequence: Input sequence (normalized), shape (seq_len, n_features)
+        n_steps: Number of prediction steps
+        scaler_X: Input scaler
+        scaler_y: Target scaler
+        device: PyTorch device
+    
+    Returns:
+        predictions: Array of predictions (original scale), shape (n_steps, n_features)
+    """
+    model.eval()
+    current_sequence = initial_sequence.copy()
+    predictions = []
+    
+    with torch.no_grad():
+        for step in range(n_steps):
+            # Prepare input tensor
+            input_tensor = torch.FloatTensor(current_sequence).unsqueeze(0).to(device)
+            
+            # Predict next step (normalized)
+            pred_normalized = model(input_tensor).cpu().numpy()[0]
+            
+            # Store prediction (convert to original scale)
+            pred_original = scaler_y.inverse_transform(pred_normalized.reshape(1, -1))[0]
+            predictions.append(pred_original)
+            
+            # Update sequence: shift and append prediction
+            # The prediction needs to be in normalized form for the next input
+            current_sequence = np.roll(current_sequence, -1, axis=0)
+            current_sequence[-1] = pred_normalized  # Already normalized
+    
+    return np.array(predictions)
