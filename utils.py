@@ -212,3 +212,95 @@ def plot_ship_trajectory_with_prediction(df_obs, df_pred, mmsi, save_path=None):
         print(f"Map saved to {save_path}")
 
     return m
+
+def create_sequences(data, sequence_length, features, target_features):
+    """
+    Create sequences for time series prediction.
+    
+    Parameters:
+    -----------
+    data : pd.DataFrame
+        Input dataframe for a single segment
+    sequence_length : int
+        Number of timesteps to use as input
+    features : list
+        List of feature column names to use as input
+    target_features : list
+        List of feature column names to predict
+        
+    Returns:
+    --------
+    X : np.array
+        Input sequences of shape (n_samples, sequence_length, n_features)
+    y : np.array
+        Target values of shape (n_samples, n_target_features)
+    """
+    X, y = [], []
+    
+    data_values = data[features].values
+    target_values = data[target_features].values
+    
+    for i in range(len(data_values) - sequence_length):
+        X.append(data_values[i:i+sequence_length])
+        y.append(target_values[i+sequence_length])
+    
+    return np.array(X), np.array(y)
+
+
+def prepare_training_data(df, sequence_length, features, target_features, min_segment_length):
+    """
+    Prepare training data from the entire dataset.
+    
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        Cleaned AIS data
+    sequence_length : int
+        Number of timesteps for input sequences
+    features : list
+        Input feature names
+    target_features : list
+        Target feature names
+    min_segment_length : int
+        Minimum segment length to include
+        
+    Returns:
+    --------
+    X : np.array
+        All input sequences
+    y : np.array
+        All target values
+    segment_info : list
+        Information about each sequence (one entry per sequence in X/y)
+    """
+    X_all, y_all = [], []
+    segment_info = []
+    
+    for (mmsi, seg), group in df.groupby(["MMSI", "Segment"]):
+        # Skip short segments
+        if len(group) < min_segment_length:
+            continue
+            
+        # Sort by timestamp to ensure correct order
+        group = group.sort_values("Timestamp")
+        
+        # Create sequences for this segment
+        X_seg, y_seg = create_sequences(group, sequence_length, features, target_features)
+        
+        if len(X_seg) > 0:
+            X_all.append(X_seg)
+            y_all.append(y_seg)
+            # Add one entry per sequence (not per segment)
+            for i in range(len(X_seg)):
+                segment_info.append({
+                    'mmsi': mmsi,
+                    'segment': seg,
+                    'length': len(group),
+                    'seq_idx_in_segment': i
+                })
+    
+    # Concatenate all sequences
+    X = np.concatenate(X_all, axis=0)
+    y = np.concatenate(y_all, axis=0)
+    
+    return X, y, segment_info
