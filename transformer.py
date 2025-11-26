@@ -12,12 +12,12 @@ import joblib
 
 from utils import plot_ship_trajectory
 
-WINDOW = 30
-HORIZON = 5
+WINDOW = 20
+HORIZON = 2
 STEP = 10
 PATIENCE = 5
 MIN_DELTA = 1e-4
-BATCH_SIZE = 64
+BATCH_SIZE = 128
 EPOCHS = 25
 LR = 1e-4
 DEVICE = "cpu"  # set to "cuda" if GPU
@@ -38,11 +38,14 @@ FEATURES = [
 
 TARGET_DIM = 2  # Δlat, Δlon
 
+
 def compute_mae(pred, true):
     if not isinstance(pred, np.ndarray):
-        pred = pred.detach().cpu().numpy()
+        # FIX 1: Ensure input is not double/float64 if it comes from NumPy arrays
+        pred = pred.detach().cpu().numpy().astype(np.float32)
     if not isinstance(true, np.ndarray):
-        true = true.detach().cpu().numpy()
+        # FIX 1: Ensure input is not double/float64 if it comes from NumPy arrays
+        true = true.detach().cpu().numpy().astype(np.float32)
 
     err = pred - true  # works for both (B,H,2) and (T,2)
 
@@ -54,9 +57,11 @@ def compute_mae(pred, true):
 
 def compute_rmse(pred, true):
     if not isinstance(pred, np.ndarray):
-        pred = pred.detach().cpu().numpy()
+        # FIX 1: Ensure input is not double/float64 if it comes from NumPy arrays
+        pred = pred.detach().cpu().numpy().astype(np.float32)
     if not isinstance(true, np.ndarray):
-        true = true.detach().cpu().numpy()
+        # FIX 1: Ensure input is not double/float64 if it comes from NumPy arrays
+        true = true.detach().cpu().numpy().astype(np.float32)
 
     err = pred - true
 
@@ -64,7 +69,6 @@ def compute_rmse(pred, true):
     rmse_lon = np.sqrt(np.mean(err[..., 1] ** 2))
 
     return rmse_lat, rmse_lon
-
 
 
 def compute_haversine_metrics(pred_coords, true_coords):
@@ -91,9 +95,9 @@ def compute_speed_error(pred_coords, true_coords):
 
     for i in range(n):
         dp = haversine(pred_coords[i][0], pred_coords[i][1],
-                       pred_coords[i+1][0], pred_coords[i+1][1])
+                       pred_coords[i + 1][0], pred_coords[i + 1][1])
         dt = haversine(true_coords[i][0], true_coords[i][1],
-                       true_coords[i+1][0], true_coords[i+1][1])
+                       true_coords[i + 1][0], true_coords[i + 1][1])
 
         speeds_pred.append(dp / 60.0)  # 1-minute AIS interval
         speeds_true.append(dt / 60.0)
@@ -105,14 +109,20 @@ def compute_turn_rate_error(pred_coords, true_coords):
     def compute_cog(lat, lon):
         dlat = np.diff(lat)
         dlon = np.diff(lon)
+        # Note: np.degrees(np.arctan2(dlon, dlat)) computes COG from lat/lon differences.
+        # This formula is correct for the COG calculation logic used elsewhere.
         return np.degrees(np.arctan2(dlon, dlat))
 
     n = min(len(pred_coords), len(true_coords))
     pred = pred_coords[:n]
     true = true_coords[:n]
 
-    pred_cog = compute_cog(pred[:,0], pred[:,1])
-    true_cog = compute_cog(true[:,0], true[:,1])
+    pred_cog = compute_cog(pred[:, 0], pred[:, 1])
+    true_cog = compute_cog(true[:, 0], true[:, 1])
+
+    # Ensure cogs have at least two points to compute turn rate
+    if len(pred_cog) < 2 or len(true_cog) < 2:
+        return 0.0  # Return 0 if not enough data for turn rate
 
     pred_turn = np.diff(pred_cog)
     true_turn = np.diff(true_cog)
@@ -122,6 +132,7 @@ def compute_turn_rate_error(pred_coords, true_coords):
 
 
 def haversine(lat1, lon1, lat2, lon2):
+    # This uses the standard 'math' library imports (radians, sin, cos, etc.)
     R = 6371000.0
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
@@ -157,7 +168,6 @@ def evaluate_metrics(pred_coords, actual_coords):
     }
 
 
-
 def compute_physics_features(df):
     """Add vx, vy, dSOG, dCOG features per segment."""
     dfs = []
@@ -174,7 +184,10 @@ def compute_physics_features(df):
 
         # Deltas
         g["dSOG"] = g["SOG"].diff().fillna(0)
-        g["dCOG"] = g["COG"].diff().fillna(0)
+        # Handle 360-degree wrap-around for COG difference
+        dCOG_raw = g["COG"].diff()
+        dCOG_wrapped = (dCOG_raw + 540) % 360 - 180
+        g["dCOG"] = dCOG_wrapped.fillna(0)
 
         dfs.append(g)
 
@@ -196,18 +209,23 @@ class AISTransformer(nn.Module):
             batch_first=True
         )
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.encoder.gradient_checkpointing = True
 
         # predict 1-step delta at a time (autoregressive decoder)
         self.decoder = nn.Linear(embed_size, TARGET_DIM)
 
     def forward(self, x):
         """Forward only encodes input window; decoding happens outside."""
+        # The input x is (B,W,F) and should be float32, which is ensured by the fix.
         z = self.embedding(x)
         z = self.encoder(z)
         return z[:, -1, :]  # last timestep representation
 
+
 class TrajectoryDataset(Dataset):
     def __init__(self, X, y):
+        # FIX 2: Ensure all tensors are created with torch.float32 (single precision)
+        # NumPy loads data as float64 by default, causing the dtype mismatch.
         self.X = torch.tensor(X, dtype=torch.float32)
         self.y = torch.tensor(y, dtype=torch.float32)
 
@@ -218,74 +236,157 @@ class TrajectoryDataset(Dataset):
         return self.X[idx], self.y[idx]
 
 
+def autoregressive_rollout(model, window, scaler_X, scaler_y, horizon=HORIZON, training=False):
+    device = window.device
+    B = window.size(0)
+
+    # scaler stats
+    X_mean = torch.tensor(scaler_X.mean_, device=device, dtype=torch.float32)
+    X_std  = torch.tensor(scaler_X.scale_, device=device, dtype=torch.float32)
+    y_mean = torch.tensor(scaler_y.mean_, device=device, dtype=torch.float32)
+    y_std  = torch.tensor(scaler_y.scale_, device=device, dtype=torch.float32)
+
+    pred_list = []
+
+    # Inverse-scale last raw features
+    last_raw = window[:, -1, :] * X_std + X_mean
+
+    prev_lat = last_raw[:, 0]
+    prev_lon = last_raw[:, 1]
+
+    # During training we don't update physics features
+    prev_raw = last_raw.clone()
+
+    for _ in range(horizon):
+        # Encode window
+        z = model(window)
+        delta_scaled = model.decoder(z)
+        pred_list.append(delta_scaled)
+
+        # Inverse-scale Δlat/Δlon
+        delta_real = delta_scaled * y_std + y_mean
+        dlat = delta_real[:, 0]
+        dlon = delta_real[:, 1]
+
+        # Update pos
+        cur_lat = prev_lat + dlat
+        cur_lon = prev_lon + dlon
+
+        if training:
+            # 🔥 FAST MODE - NO PHYSICS
+            # Only lat/lon change; other features remain constant
+            new_raw = prev_raw.clone()
+            new_raw[:, 0] = cur_lat
+            new_raw[:, 1] = cur_lon
+
+        else:
+            # FULL PHYSICS for inference
+            dist_m = haversine_torch(prev_lat, prev_lon, cur_lat, cur_lon)
+            SOG = dist_m / 60.0
+            dY = cur_lat - prev_lat
+            dX = cur_lon - prev_lon
+            COG = (torch.rad2deg(torch.atan2(dX, dY)) + 360) % 360
+            vx = SOG * torch.cos(torch.deg2rad(COG))
+            vy = SOG * torch.sin(torch.deg2rad(COG))
+            dSOG = SOG - prev_raw[:, 2]
+            dCOG = ((COG - prev_raw[:, 3] + 540) % 360) - 180
+
+            new_raw = torch.stack(
+                [cur_lat, cur_lon, SOG, COG, vx, vy, dSOG, dCOG],
+                dim=1
+            )
+
+        # Scale new row
+        new_scaled = (new_raw - X_mean) / X_std
+
+        # Slide window
+        window = torch.cat([window[:, 1:], new_scaled.unsqueeze(1)], dim=1)
+
+        # Update prev
+        prev_lat = cur_lat
+        prev_lon = cur_lon
+        prev_raw = new_raw
+
+    return torch.stack(pred_list, dim=1), window
+
+
+
 def build_dataset():
     print("Loading CSV...")
     df = pd.read_csv(CSV_PATH)
     df = compute_physics_features(df)
 
-    # Store scalers per segment (A)
-    segment_scalers = {}
-
-    X_samples = []
-    y_samples = []
+    raw_windows = []
+    raw_targets = []
     meta_rows = []
 
-    print("Building sliding windows...")
+    print("Building raw (unscaled) windows...")
     for (mmsi, seg), g in df.groupby(["MMSI", "Segment"], observed=True):
         g = g.sort_values("Timestamp").reset_index(drop=True)
 
         if len(g) < WINDOW + HORIZON + 1:
             continue
 
-        # -----------------------------
-        # Fit feature scaler per segment
-        scaler_X = StandardScaler().fit(g[FEATURES])
-        X_scaled = scaler_X.transform(g[FEATURES])
-
-        # Compute deltas (target)
         lat = g["Latitude"].values
         lon = g["Longtitude"].values
-
         dlat = lat[1:] - lat[:-1]
         dlon = lon[1:] - lon[:-1]
-        deltas = np.stack([dlat, dlon], axis=-1)  # (N-1, 2)
+        deltas = np.stack([dlat, dlon], axis=1)
 
-        # Fit ROBUST scaler for deltas (C)
-        scaler_y = RobustScaler().fit(deltas)
-        delta_scaled = scaler_y.transform(deltas)
+        feat = g[FEATURES].values
 
-        # save segment scalers
-        segment_scalers[(mmsi, seg)] = (scaler_X, scaler_y)
-
-        # -----------------------------
-        # Create windows
         for i in range(0, len(g) - WINDOW - HORIZON, STEP):
 
-            X_window = X_scaled[i:i + WINDOW]
+            X_window_raw = feat[i:i + WINDOW]
+            future_raw = deltas[i + WINDOW - 1:i + WINDOW - 1 + HORIZON]
 
-            # HORIZON future deltas (scaled)
-            future_delta_scaled = delta_scaled[i + WINDOW - 1: i + WINDOW - 1 + HORIZON]
-
-            if future_delta_scaled.shape[0] != HORIZON:
+            if future_raw.shape[0] != HORIZON:
                 continue
 
-            X_samples.append(X_window)
-            y_samples.append(future_delta_scaled)
+            raw_windows.append(X_window_raw)
+            raw_targets.append(future_raw)
 
             meta_rows.append({
-                "mmsi": int(mmsi),
-                "segment": int(seg),
-                "last_lat": float(lat[i + WINDOW - 1]),
-                "last_lon": float(lon[i + WINDOW - 1])
+                "mmsi": mmsi,
+                "segment": seg,
+                "last_lat": lat[i + WINDOW - 1],
+                "last_lon": lon[i + WINDOW - 1]
             })
 
-    X = np.array(X_samples)
-    y = np.array(y_samples)
-
-    print("Saving X, y, meta and scalers...")
+    # FIX 3: Explicitly set NumPy array dtype to float32
+    raw_X = np.array(raw_windows, dtype=np.float32)
+    raw_y = np.array(raw_targets, dtype=np.float32)
     meta = pd.DataFrame(meta_rows)
-    print(f"Dataset built: X={X.shape}, y={y.shape}, meta={meta.shape}")
-    return X, y, meta, segment_scalers
+
+    print(f"Built RAW dataset: X={raw_X.shape}, y={raw_y.shape}, meta={meta.shape}")
+
+    # Ship-based split (done ONCE here)
+    train_idx, val_idx, test_idx, train_ships, val_ships, test_ships = ship_based_split(meta)
+
+    # Fit scalers ONLY on train
+    train_feat = raw_X[train_idx].reshape(-1, raw_X.shape[-1])
+    train_deltas = raw_y[train_idx].reshape(-1, 2)
+
+    global_scaler_X = StandardScaler().fit(train_feat)
+    global_scaler_y = StandardScaler().fit(train_deltas)
+
+    # Transform entire dataset
+    X_scaled = global_scaler_X.transform(raw_X.reshape(-1, raw_X.shape[-1])).reshape(raw_X.shape).astype(np.float32)
+    y_scaled = global_scaler_y.transform(raw_y.reshape(-1, 2)).reshape(raw_y.shape).astype(np.float32)
+
+    print("Dataset scaling done. No leakage.")
+
+    segment_scalers = {
+        (meta.loc[i, "mmsi"], meta.loc[i, "segment"]): (global_scaler_X, global_scaler_y)
+        for i in range(len(meta))
+    }
+
+    return (
+        X_scaled, y_scaled, meta,
+        segment_scalers,
+        train_idx, val_idx, test_idx,
+        global_scaler_X, global_scaler_y
+    )
 
 
 def ship_based_split(meta, train_ratio=0.64, val_ratio=0.16, test_ratio=0.20, seed=42):
@@ -349,166 +450,166 @@ def ship_based_split(meta, train_ratio=0.64, val_ratio=0.16, test_ratio=0.20, se
 
 
 def train_model():
-    X, y, meta, segment_scalers = build_dataset()
-    train_idx, val_idx, test_idx, train_ships, val_ships, test_ships = ship_based_split(meta)
+    (
+        X, y, meta,
+        segment_scalers,
+        train_idx, val_idx, test_idx,
+        global_scaler_X, global_scaler_y
+    ) = build_dataset()
 
-    # Build datasets
     train_ds = TrajectoryDataset(X[train_idx], y[train_idx])
     val_ds = TrajectoryDataset(X[val_idx], y[val_idx])
     test_ds = TrajectoryDataset(X[test_idx], y[test_idx])
 
-    train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE)
-    test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE)
+    train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=4,
+    pin_memory=False)
+    val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE, num_workers=4,
+    pin_memory=False)
+    test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, num_workers=4,
+    pin_memory=False)
 
-    # Initialize model
+    # Ensure model is on the correct device
     model = AISTransformer(input_size=len(FEATURES)).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
     criterion = nn.HuberLoss(delta=1.0)
 
-    print("Training...")
-    best_val_loss = float('inf')
+    best_val_loss = float("inf")
     patience_counter = 0
 
     for epoch in range(EPOCHS):
 
+        # ------------------- TRAIN -------------------
         model.train()
-        train_loss = 0.0
-
-        train_mae_lat = train_mae_lon = 0.0
-        train_rmse_lat = train_rmse_lon = 0.0
+        total_loss = 0
+        total_mae_lat = 0
+        total_mae_lon = 0
+        total_rmse_lat = 0
+        total_rmse_lon = 0
 
         for xb, yb in train_loader:
+            # xb, yb are float32 now due to TrajectoryDataset fix
             xb, yb = xb.to(DEVICE), yb.to(DEVICE)
             optimizer.zero_grad()
 
-            z = model(xb)
-            h_rep = z.unsqueeze(1).repeat(1, HORIZON, 1)
-            preds = model.decoder(h_rep)
+            pred_scaled, _ = autoregressive_rollout(
+                model, xb,
+                global_scaler_X, global_scaler_y,
+                horizon=HORIZON, training=True
+            )
 
-            # Loss
-            loss = criterion(preds, yb)
+            # FIX 4: pred_scaled is already a float32 Tensor from autoregressive_rollout
+            # The line 'pred_t = torch.tensor(pred_scaled, ...)' is problematic
+            # as it creates a new Tensor, sometimes inferring dtype incorrectly.
+            # pred_scaled is already a Tensor, so we can just use it.
+            pred_t = pred_scaled.float()  # Ensure float32
 
-            # Metrics
-            mae_lat, mae_lon = compute_mae(preds, yb)
-            rmse_lat, rmse_lon = compute_rmse(preds, yb)
-
-            train_mae_lat += mae_lat
-            train_mae_lon += mae_lon
-            train_rmse_lat += rmse_lat
-            train_rmse_lon += rmse_lon
+            loss = criterion(pred_t, yb)
+            mae_lat, mae_lon = compute_mae(pred_t, yb)
+            rmse_lat, rmse_lon = compute_rmse(pred_t, yb)
 
             loss.backward()
             optimizer.step()
-            train_loss += loss.item()
 
-        # Averages
-        batches = len(train_loader)
-        train_loss /= batches
-        train_mae_lat /= batches
-        train_mae_lon /= batches
-        train_rmse_lat /= batches
-        train_rmse_lon /= batches
+            total_loss += loss.item()
+            total_mae_lat += mae_lat
+            total_mae_lon += mae_lon
+            total_rmse_lat += rmse_lat
+            total_rmse_lon += rmse_lon
 
-        print(f"\nEpoch {epoch+1}/{EPOCHS}")
-        print(f"Train Loss: {train_loss:.6f}")
-        print(f"Train MAE(lat): {train_mae_lat:.6f}, MAE(lon): {train_mae_lon:.6f}, "
-              f"RMSE(lat): {train_rmse_lat:.6f}, RMSE(lon): {train_rmse_lon:.6f}")
+        n_batches = len(train_loader)
+        print(f"\nEpoch {epoch + 1}/{EPOCHS}")
+        print(f"Train Loss: {total_loss / n_batches:.6f}")
+        print(f"Train MAE(lat): {total_mae_lat / n_batches:.6f}, "
+              f"MAE(lon): {total_mae_lon / n_batches:.6f}")
 
+        # ------------------- VALIDATION -------------------
         model.eval()
-        val_loss = 0.0
-        val_mae_lat = val_mae_lon = 0.0
-        val_rmse_lat = val_rmse_lon = 0.0
-
+        val_loss = 0
         with torch.no_grad():
             for xb, yb in val_loader:
                 xb, yb = xb.to(DEVICE), yb.to(DEVICE)
 
-                z = model(xb)
-                h_rep = z.unsqueeze(1).repeat(1, HORIZON, 1)
-                preds = model.decoder(h_rep)
+                pred_scaled, _ = autoregressive_rollout(
+                    model, xb,
+                    global_scaler_X, global_scaler_y,
+                    horizon=HORIZON, training=False
+                )
+                pred_t = pred_scaled.float()  # Ensure float32
 
-                val_loss += criterion(preds, yb).item()
+                val_loss += criterion(pred_t, yb).item()
 
-                mae_lat, mae_lon = compute_mae(preds, yb)
-                rmse_lat, rmse_lon = compute_rmse(preds, yb)
-
-                val_mae_lat += mae_lat
-                val_mae_lon += mae_lon
-                val_rmse_lat += rmse_lat
-                val_rmse_lon += rmse_lon
-
-        val_batches = len(val_loader)
-        val_loss /= val_batches
-        val_mae_lat /= val_batches
-        val_mae_lon /= val_batches
-        val_rmse_lat /= val_batches
-        val_rmse_lon /= val_batches
-
+        val_loss /= len(val_loader)
         print(f"Val Loss: {val_loss:.6f}")
-        print(f"Val MAE(lat): {val_mae_lat:.6f}, MAE(lon): {val_mae_lon:.6f}, "
-              f"RMSE(lat): {val_rmse_lat:.6f}, RMSE(lon): {val_rmse_lon:.6f}")
 
-        if val_loss + MIN_DELTA < best_val_loss:
+        if val_loss < best_val_loss - MIN_DELTA:
             best_val_loss = val_loss
+            # Save model for best val loss
+            torch.save({
+                "model_state": model.state_dict(),
+                "segment_scalers": segment_scalers,
+                "meta": meta,
+                "train_idx": train_idx,
+                "val_idx": val_idx,
+                "test_idx": test_idx,
+                "global_scaler_X": global_scaler_X,
+                "global_scaler_y": global_scaler_y,
+                "X": X, "y": y
+            }, "ais_model_best.pth")
             patience_counter = 0
         else:
             patience_counter += 1
             if patience_counter >= PATIENCE:
-                print("\n🛑 Early stopping triggered. Stopping training.")
+                print("Early stopping.")
                 break
 
-    print("\nEvaluating on test set...")
-    test_loss = 0.0
-    test_mae_lat = test_mae_lon = 0.0
-    test_rmse_lat = test_rmse_lon = 0.0
+    # Load best model for final testing
+    if patience_counter >= PATIENCE:
+        print("Loading best model for test evaluation...")
+        best_ckpt = torch.load("ais_model_best.pth", map_location=DEVICE, weights_only=False)
+        model.load_state_dict(best_ckpt["model_state"])
 
+    # ------------------- TEST -------------------
+    print("\nEvaluating on test set...")
+    test_loss = 0
     with torch.no_grad():
         for xb, yb in test_loader:
             xb, yb = xb.to(DEVICE), yb.to(DEVICE)
+            pred_scaled, _ = autoregressive_rollout(
+                model, xb,
+                global_scaler_X, global_scaler_y,
+                horizon=HORIZON, training=False
+            )
+            pred_t = pred_scaled.float()  # Ensure float32
+            test_loss += criterion(pred_t, yb).item()
 
-            z = model(xb)
-            h_rep = z.unsqueeze(1).repeat(1, HORIZON, 1)
-            preds = model.decoder(h_rep)
+    test_loss /= len(test_loader)
+    print(f"Test Loss: {test_loss:.6f}")
 
-            test_loss += criterion(preds, yb).item()
-
-            mae_lat, mae_lon = compute_mae(preds, yb)
-            rmse_lat, rmse_lon = compute_rmse(preds, yb)
-
-            test_mae_lat += mae_lat
-            test_mae_lon += mae_lon
-            test_rmse_lat += rmse_lat
-            test_rmse_lon += rmse_lon
-
-    test_batches = len(test_loader)
-    test_loss /= test_batches
-    test_mae_lat /= test_batches
-    test_mae_lon /= test_batches
-    test_rmse_lat /= test_batches
-    test_rmse_lon /= test_batches
-
-    print(f"\nTest Loss: {test_loss:.6f}")
-    print(f"Test MAE(lat): {test_mae_lat:.6f}, MAE(lon): {test_mae_lon:.6f}, "
-          f"RMSE(lat): {test_rmse_lat:.6f}, RMSE(lon): {test_rmse_lon:.6f}")
-
-    # Save final checkpoint
-    model_ckpt = {
+    # Final save of the model (could be the best or the last epoch)
+    final_save_path = "ais_model_final.pth"
+    torch.save({
         "model_state": model.state_dict(),
         "segment_scalers": segment_scalers,
         "meta": meta,
-        "train_ships": train_ships,
-        "val_ships": val_ships,
-        "test_ships": test_ships,
-        "X": X,
-        "y": y
-    }
+        "train_idx": train_idx,
+        "val_idx": val_idx,
+        "test_idx": test_idx,
+        "global_scaler_X": global_scaler_X,
+        "global_scaler_y": global_scaler_y,
+        "X": X, "y": y
+    }, final_save_path)
 
-    torch.save(model_ckpt, "ais_model_final.pth")
-
+    print(f"Model state saved to {final_save_path}.")
 
 
 def predict_sample(idx):
+    """
+    DEPRECATED: This function uses the non-autoregressive (cheating) prediction
+    where all future steps are predicted from a single state representation (z).
+    Use predict_sample_autoregressive(idx) instead.
+    """
+    print("Warning: Using non-autoregressive (cheating) prediction. Use predict_sample_autoregressive.")
+
     # Load checkpoint ONCE per call
     ckpt = torch.load("ais_model_final.pth", map_location=DEVICE, weights_only=False)
 
@@ -518,26 +619,21 @@ def predict_sample(idx):
 
     # Extract scaler
     mmsi = int(meta.loc[idx, "mmsi"])
-    seg  = int(meta.loc[idx, "segment"])
+    seg = int(meta.loc[idx, "segment"])
     _, scaler_y = segment_scalers[(mmsi, seg)]
 
     # Load model weights correctly
     model = AISTransformer(input_size=len(FEATURES)).to(DEVICE)
-    model.load_state_dict(ckpt["model_state"])   # <-- FIXED
+    model.load_state_dict(ckpt["model_state"])
     model.eval()
 
-    # Single window
-    x = torch.tensor(X[idx:idx+1], dtype=torch.float32).to(DEVICE)
+    # Single window, ensure float32
+    x = torch.tensor(X[idx:idx + 1], dtype=torch.float32).to(DEVICE)
 
     # Predict
     with torch.no_grad():
         z = model(x)
-        # preds = []
-        # h = z
-        # for _ in range(HORIZON):
-        #     step_pred = model.decoder(h)
-        #     preds.append(step_pred)
-        # preds = torch.stack(preds, dim=1)[0].cpu().numpy()
+        # Prediction of all H steps from a single state (the cheat)
         h_rep = z.unsqueeze(1).repeat(1, HORIZON, 1)
         preds = model.decoder(h_rep)
         # Convert to numpy (HORIZON, 2)
@@ -555,11 +651,15 @@ def predict_sample(idx):
 
     return coords
 
+
 def predict_sample_autoregressive(idx):
     """Autoregressive prediction using ALL physics-aware features."""
 
+    # --- FIX: Ensure the file path is correct ---
+    # The file "ais_model_final.pth" contains all necessary context.
     ckpt = torch.load("ais_model_final.pth", map_location=DEVICE, weights_only=False)
 
+    # --- FIX: Load meta and X from the checkpoint ---
     meta = ckpt["meta"]
     X = ckpt["X"]
     segment_scalers = ckpt["segment_scalers"]
@@ -567,14 +667,18 @@ def predict_sample_autoregressive(idx):
     # Extract scalers for this segment
     mmsi = int(meta.loc[idx, "mmsi"])
     seg = int(meta.loc[idx, "segment"])
-    scaler_X, scaler_y = segment_scalers[(mmsi, seg)]
+    # The scalers are saved as a dictionary of tuples in the checkpoint
+    scaler_X, scaler_y = ckpt["global_scaler_X"], ckpt["global_scaler_y"]
+    # NOTE: The segment_scalers in the checkpoint were redundant as they hold the global scalers.
+    # We use the global scalers directly from the checkpoint for simplicity and correctness.
 
     # Load the model
     model = AISTransformer(input_size=len(FEATURES)).to(DEVICE)
     model.load_state_dict(ckpt["model_state"])
     model.eval()
 
-    # Initial scaled window
+    # Initial scaled window (already float32 from build_dataset fix)
+    # --- FIX: Access the specific window X[idx] ---
     window = X[idx].copy()
 
     # Last observed actual coordinates
@@ -592,8 +696,10 @@ def predict_sample_autoregressive(idx):
 
     with torch.no_grad():
         for _ in range(HORIZON):
+            # ... (rest of the prediction loop remains as previously corrected,
+            # ensuring all haversine inputs are torch tensors) ...
 
-            # Model input
+            # Model input: ensure it is float32
             x = torch.tensor(window[np.newaxis, ...], dtype=torch.float32).to(DEVICE)
 
             # Predict Δlat, Δlon (scaled)
@@ -604,20 +710,27 @@ def predict_sample_autoregressive(idx):
             delta_real = scaler_y.inverse_transform(delta_scaled.reshape(1, -1))[0]
             dlat, dlon = delta_real
 
-            # Update coordinates
+            # Update coordinates (now floats/scalars)
             cur_lat = prev_lat + dlat
             cur_lon = prev_lon + dlon
             pred_coords.append([cur_lat, cur_lon])
 
-            # ------- UPDATE ALL PHYSICS-AWARE FEATURES -------
+            # --- Haversine Fix (Using torch tensors for input) ---
+            p_lat = torch.tensor(prev_lat, dtype=torch.float32, device=DEVICE)
+            p_lon = torch.tensor(prev_lon, dtype=torch.float32, device=DEVICE)
+            c_lat = torch.tensor(cur_lat, dtype=torch.float32, device=DEVICE)
+            c_lon = torch.tensor(cur_lon, dtype=torch.float32, device=DEVICE)
 
             # 1. Compute distance travelled (meters)
-            dist_m = haversine(prev_lat, prev_lon, cur_lat, cur_lon)
+            # The haversine function must be the PyTorch-compatible version
+            dist_m_tensor = haversine_torch(p_lat, p_lon, c_lat, c_lon)
+            dist_m = dist_m_tensor.item()
+            # -----------------------------------------------------
 
             # 2. Compute new SOG (speed over ground)
             SOG = dist_m / 60.0  # AIS = 60 sec interval
 
-            # 3. Compute new COG (direction)
+            # 3. Compute new COG (direction) (Keep using np/scalars)
             dY = cur_lat - prev_lat
             dX = cur_lon - prev_lon
             COG = (np.degrees(np.arctan2(dX, dY)) + 360) % 360
@@ -631,25 +744,15 @@ def predict_sample_autoregressive(idx):
             dCOG = (COG - prev_COG + 540) % 360 - 180  # normalize turn rate
 
             # New raw feature row (unscaled)
-            new_row = {
-                "Latitude": cur_lat,
-                "Longtitude": cur_lon,
-                "SOG": SOG,
-                "COG": COG,
-                "vx": vx,
-                "vy": vy,
-                "dSOG": dSOG,
-                "dCOG": dCOG
-            }
-
-            # Prepare DataFrame in correct feature order
-            temp_df = pd.DataFrame([[new_row[f] for f in FEATURES]], columns=FEATURES)
+            new_row_array = np.array([[
+                cur_lat, cur_lon, SOG, COG, vx, vy, dSOG, dCOG
+            ]], dtype=np.float32)
 
             # Scale new row for next window
-            new_scaled = scaler_X.transform(temp_df)[0]
+            new_scaled = scaler_X.transform(new_row_array)[0]
 
-            # Slide window
-            window = np.vstack([window[1:], new_scaled])
+            # Slide window: ensure the new row is float32 before vstack
+            window = np.vstack([window[1:], new_scaled.astype(np.float32)])
 
             # Update prev state
             prev_lat, prev_lon = cur_lat, cur_lon
@@ -658,6 +761,24 @@ def predict_sample_autoregressive(idx):
     return np.array(pred_coords)
 
 
+def haversine_torch(lat1, lon1, lat2, lon2):
+    R = 6371000.0  # Earth radius in meters
+
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    # Convert degrees to radians using torch.deg2rad
+    dlat_rad = torch.deg2rad(dlat)
+    dlon_rad = torch.deg2rad(dlon)
+    lat1_rad = torch.deg2rad(lat1)
+    lat2_rad = torch.deg2rad(lat2)
+
+    # Haversine formula using torch functions
+    a = torch.sin(dlat_rad / 2) ** 2 + \
+        torch.cos(lat1_rad) * torch.cos(lat2_rad) * torch.sin(dlon_rad / 2) ** 2
+    c = 2 * torch.atan2(torch.sqrt(a), torch.sqrt(1 - a))
+
+    return R * c
 import folium
 
 
@@ -768,7 +889,7 @@ def evaluate_full_ship(mmsi):
 
     all_pred_coords = []
     for idx in ship_meta_sorted["window_index"]:
-        #pred_coords = predict_sample(idx)
+        # We exclusively use the correct autoregressive prediction function now
         pred_coords = predict_sample_autoregressive(idx)
         all_pred_coords.extend(pred_coords.tolist())
 
@@ -826,11 +947,17 @@ def visualize_full_ship_route(full_actual, pred_future, mmsi, save_path=None):
 if __name__ == "__main__":
     df = pd.read_csv(CSV_PATH)
     print(df.head())
-    mmsi = 244768000
+    #mmsi = 220464000
+    # Good results
+    #mmsi = 231025000
+    mmsi = 220464000
+    # Uncomment the line below to train the corrected model
     #train_model()
-    # actual, predicted = evaluate_full_ship(255814000)
-    # actual, predicted = evaluate_full_ship(205210000)
+
+
+    # The evaluation now relies solely on the fixed autoregressive logic
     actual, predicted = evaluate_full_ship(mmsi)
     metrics = evaluate_metrics(predicted, actual)
-    plot_ship_trajectory(df, mmsi, "temp.html")
+    # The 'plot_ship_trajectory' utility (if available) and visualization calls remain
+    # plot_ship_trajectory(df, mmsi, "temp.html")
     visualize_full_ship_route(actual, predicted, mmsi)
