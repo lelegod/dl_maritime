@@ -306,6 +306,32 @@ def prepare_training_data(df, sequence_length, features, target_features, min_se
     
     return X, y, segment_info
 
+def prepare_delta_sequences(df, seq_length, features, target_features, min_length):
+    """Prepare sequences with delta coordinates."""
+    X_list = []
+    y_list = []
+    segment_info = []
+    
+    for (mmsi, seg), group in df.groupby(['MMSI', 'Segment']):
+        if len(group) < min_length:
+            continue
+            
+        # Extract feature values
+        data = group[features].values
+        
+        # Create sequences
+        for i in range(len(data) - seq_length):
+            X_list.append(data[i:i+seq_length])
+            y_list.append(data[i+seq_length])  # Next step's delta values
+            segment_info.append({
+                'mmsi': mmsi,
+                'segment': seg,
+                'length': len(group),
+                'start_idx': i
+            })
+    
+    return np.array(X_list), np.array(y_list), segment_info
+
 # Function for iterative prediction
 def iterative_predict(model, initial_sequence, n_steps, scaler_X, scaler_y, device):
     """
@@ -344,3 +370,58 @@ def iterative_predict(model, initial_sequence, n_steps, scaler_X, scaler_y, devi
             current_sequence[-1] = pred_normalized  # Already normalized
     
     return np.array(predictions)
+
+def iterative_predict_delta(model, initial_sequence, n_steps, scaler_X, scaler_y, device, 
+                            last_lat, last_lon):
+    """
+    Perform multi-step iterative prediction with delta coordinates.
+    Returns both delta predictions and absolute positions.
+    
+    Args:
+        model: Trained GRU model
+        initial_sequence: Input sequence (normalized), shape (seq_len, n_features)
+        n_steps: Number of prediction steps
+        scaler_X: Input scaler (for deltas)
+        scaler_y: Target scaler (for deltas)
+        device: PyTorch device
+        last_lat: Last known absolute latitude
+        last_lon: Last known absolute longitude
+    
+    Returns:
+        predictions_abs: Array of absolute predictions, shape (n_steps, 4) [lat, lon, sog, cog]
+        predictions_delta: Array of delta predictions, shape (n_steps, 4)
+    """
+    model.eval()
+    current_sequence = initial_sequence.copy()
+    predictions_delta = []
+    predictions_abs = []
+    
+    current_lat = last_lat
+    current_lon = last_lon
+    
+    with torch.no_grad():
+        for step in range(n_steps):
+            # Prepare input tensor
+            input_tensor = torch.FloatTensor(current_sequence).unsqueeze(0).to(device)
+            
+            # Predict next step (normalized deltas)
+            pred_normalized = model(input_tensor).cpu().numpy()[0]
+            
+            # Convert to original scale (deltas)
+            pred_delta = scaler_y.inverse_transform(pred_normalized.reshape(1, -1))[0]
+            predictions_delta.append(pred_delta)
+            
+            # Convert delta to absolute position
+            new_lat = current_lat + pred_delta[0]
+            new_lon = current_lon + pred_delta[1]
+            predictions_abs.append([new_lat, new_lon, pred_delta[2], pred_delta[3]])
+            
+            # Update current position for next iteration
+            current_lat = new_lat
+            current_lon = new_lon
+            
+            # Update sequence: shift and append prediction (normalized form)
+            current_sequence = np.roll(current_sequence, -1, axis=0)
+            current_sequence[-1] = pred_normalized  # Already normalized
+    
+    return np.array(predictions_abs), np.array(predictions_delta)
