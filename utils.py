@@ -374,8 +374,8 @@ def iterative_predict(model, initial_sequence, n_steps, scaler_X, scaler_y, devi
         model: Trained GRU model
         initial_sequence: Input sequence (normalized), shape (seq_len, n_features)
         n_steps: Number of prediction steps
-        scaler_X: Input scaler
-        scaler_y: Target scaler
+        scaler_X: Input scaler (for input features)
+        scaler_y: Target scaler (for output features)
         device: PyTorch device
     
     Returns:
@@ -390,17 +390,20 @@ def iterative_predict(model, initial_sequence, n_steps, scaler_X, scaler_y, devi
             # Prepare input tensor
             input_tensor = torch.FloatTensor(current_sequence).unsqueeze(0).to(device)
             
-            # Predict next step (normalized)
-            pred_normalized = model(input_tensor).cpu().numpy()[0]
+            # Predict next step (normalized by scaler_y)
+            pred_normalized_y = model(input_tensor).cpu().numpy()[0]
             
-            # Store prediction (convert to original scale)
-            pred_original = scaler_y.inverse_transform(pred_normalized.reshape(1, -1))[0]
+            # Convert prediction to original scale
+            pred_original = scaler_y.inverse_transform(pred_normalized_y.reshape(1, -1))[0]
             predictions.append(pred_original)
             
             # Update sequence: shift and append prediction
-            # The prediction needs to be in normalized form for the next input
+            # CRITICAL FIX: Re-normalize prediction using scaler_X (not scaler_y)
+            # because the input sequence expects scaler_X normalization
+            pred_normalized_x = scaler_X.transform(pred_original.reshape(1, -1))[0]
+            
             current_sequence = np.roll(current_sequence, -1, axis=0)
-            current_sequence[-1] = pred_normalized  # Already normalized
+            current_sequence[-1] = pred_normalized_x  # Normalized by scaler_X
     
     return np.array(predictions)
 
@@ -414,8 +417,8 @@ def iterative_predict_delta(model, initial_sequence, n_steps, scaler_X, scaler_y
         model: Trained GRU model
         initial_sequence: Input sequence (normalized), shape (seq_len, n_features)
         n_steps: Number of prediction steps
-        scaler_X: Input scaler (for deltas)
-        scaler_y: Target scaler (for deltas)
+        scaler_X: Input scaler (for input features)
+        scaler_y: Target scaler (for output features)
         device: PyTorch device
         last_lat: Last known absolute latitude
         last_lon: Last known absolute longitude
@@ -437,11 +440,11 @@ def iterative_predict_delta(model, initial_sequence, n_steps, scaler_X, scaler_y
             # Prepare input tensor
             input_tensor = torch.FloatTensor(current_sequence).unsqueeze(0).to(device)
             
-            # Predict next step (normalized deltas)
-            pred_normalized = model(input_tensor).cpu().numpy()[0]
+            # Predict next step (normalized by scaler_y)
+            pred_normalized_y = model(input_tensor).cpu().numpy()[0]
             
             # Convert to original scale (deltas)
-            pred_delta = scaler_y.inverse_transform(pred_normalized.reshape(1, -1))[0]
+            pred_delta = scaler_y.inverse_transform(pred_normalized_y.reshape(1, -1))[0]
             predictions_delta.append(pred_delta)
             
             # Convert delta to absolute position
@@ -453,8 +456,86 @@ def iterative_predict_delta(model, initial_sequence, n_steps, scaler_X, scaler_y
             current_lat = new_lat
             current_lon = new_lon
             
-            # Update sequence: shift and append prediction (normalized form)
+            # Update sequence: shift and append prediction
+            # CRITICAL FIX: Re-normalize prediction using scaler_X (not scaler_y)
+            # because the input sequence expects scaler_X normalization
+            pred_normalized_x = scaler_X.transform(pred_delta.reshape(1, -1))[0]
+            
             current_sequence = np.roll(current_sequence, -1, axis=0)
-            current_sequence[-1] = pred_normalized  # Already normalized
+            current_sequence[-1] = pred_normalized_x  # Normalized by scaler_X
     
     return np.array(predictions_abs), np.array(predictions_delta)
+
+
+def iterative_predict_delta_cog_sincos(model, initial_sequence, n_steps, scaler_X, scaler_y, device, 
+                                        last_lat, last_lon):
+    """
+    Perform multi-step iterative prediction with delta coordinates and COG sin/cos encoding.
+    Returns both delta predictions and absolute positions.
+    
+    Features expected: [delta_Lat, delta_Lon, SOG, COG_sin, COG_cos]
+    
+    Args:
+        model: Trained GRU model
+        initial_sequence: Input sequence (normalized), shape (seq_len, 5)
+        n_steps: Number of prediction steps
+        scaler_X: Input scaler (for input features)
+        scaler_y: Target scaler (for output features)
+        device: PyTorch device
+        last_lat: Last known absolute latitude
+        last_lon: Last known absolute longitude
+    
+    Returns:
+        predictions_abs: Array of absolute predictions, shape (n_steps, 4) [lat, lon, sog, cog_degrees]
+        predictions_raw: Array of raw predictions, shape (n_steps, 5) [delta_lat, delta_lon, sog, cog_sin, cog_cos]
+    """
+    model.eval()
+    current_sequence = initial_sequence.copy()
+    predictions_raw = []
+    predictions_abs = []
+    
+    current_lat = last_lat
+    current_lon = last_lon
+    
+    with torch.no_grad():
+        for step in range(n_steps):
+            # Prepare input tensor
+            input_tensor = torch.FloatTensor(current_sequence).unsqueeze(0).to(device)
+            
+            # Predict next step (normalized by scaler_y)
+            pred_normalized_y = model(input_tensor).cpu().numpy()[0]
+            
+            # Convert to original scale
+            pred_original = scaler_y.inverse_transform(pred_normalized_y.reshape(1, -1))[0]
+            # pred_original = [delta_lat, delta_lon, sog, cog_sin, cog_cos]
+            predictions_raw.append(pred_original)
+            
+            # Extract components
+            delta_lat = pred_original[0]
+            delta_lon = pred_original[1]
+            sog = pred_original[2]
+            cog_sin = pred_original[3]
+            cog_cos = pred_original[4]
+            
+            # Convert COG sin/cos back to degrees
+            cog_degrees = np.rad2deg(np.arctan2(cog_sin, cog_cos))
+            if cog_degrees < 0:
+                cog_degrees += 360  # Normalize to 0-360
+            
+            # Convert delta to absolute position
+            new_lat = current_lat + delta_lat
+            new_lon = current_lon + delta_lon
+            predictions_abs.append([new_lat, new_lon, sog, cog_degrees])
+            
+            # Update current position for next iteration
+            current_lat = new_lat
+            current_lon = new_lon
+            
+            # Update sequence: shift and append prediction
+            # Re-normalize prediction using scaler_X
+            pred_normalized_x = scaler_X.transform(pred_original.reshape(1, -1))[0]
+            
+            current_sequence = np.roll(current_sequence, -1, axis=0)
+            current_sequence[-1] = pred_normalized_x
+    
+    return np.array(predictions_abs), np.array(predictions_raw)
