@@ -307,30 +307,63 @@ def prepare_training_data(df, sequence_length, features, target_features, min_se
     return X, y, segment_info
 
 def prepare_delta_sequences(df, seq_length, features, target_features, min_length):
-    """Prepare sequences with delta coordinates."""
-    X_list = []
-    y_list = []
+    """
+    Prepare sequences with delta coordinates.
+    Uses create_sequences internally for consistency with prepare_training_data.
+    
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        DataFrame with delta coordinates computed (delta_Lat, delta_Lon, etc.)
+    seq_length : int
+        Number of timesteps for input sequences
+    features : list
+        Input feature names (e.g., ['delta_Lat', 'delta_Lon', 'SOG', 'COG'])
+    target_features : list
+        Target feature names
+    min_length : int
+        Minimum segment length to include
+        
+    Returns:
+    --------
+    X : np.array
+        All input sequences
+    y : np.array
+        All target values
+    segment_info : list
+        Information about each sequence (one entry per sequence in X/y)
+    """
+    X_all, y_all = [], []
     segment_info = []
     
     for (mmsi, seg), group in df.groupby(['MMSI', 'Segment']):
+        # Skip short segments
         if len(group) < min_length:
             continue
-            
-        # Extract feature values
-        data = group[features].values
         
-        # Create sequences
-        for i in range(len(data) - seq_length):
-            X_list.append(data[i:i+seq_length])
-            y_list.append(data[i+seq_length])  # Next step's delta values
-            segment_info.append({
-                'mmsi': mmsi,
-                'segment': seg,
-                'length': len(group),
-                'start_idx': i
-            })
+        # Sort by timestamp to ensure correct order
+        group = group.sort_values('Timestamp')
+        
+        # Create sequences for this segment using the shared function
+        X_seg, y_seg = create_sequences(group, seq_length, features, target_features)
+        
+        if len(X_seg) > 0:
+            X_all.append(X_seg)
+            y_all.append(y_seg)
+            # Add one entry per sequence (not per segment)
+            for i in range(len(X_seg)):
+                segment_info.append({
+                    'mmsi': mmsi,
+                    'segment': seg,
+                    'length': len(group),
+                    'seq_idx_in_segment': i
+                })
     
-    return np.array(X_list), np.array(y_list), segment_info
+    # Concatenate all sequences
+    X = np.concatenate(X_all, axis=0)
+    y = np.concatenate(y_all, axis=0)
+    
+    return X, y, segment_info
 
 # Function for iterative prediction
 def iterative_predict(model, initial_sequence, n_steps, scaler_X, scaler_y, device):
