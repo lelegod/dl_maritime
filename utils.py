@@ -96,6 +96,26 @@ def haversine_m(lat1, lon1, lat2, lon2):
     a = np.sin(dlat/2)**2 + np.cos(lat1)*np.cos(lat2)*np.sin(dlon/2)**2
     return 2 * R * np.arcsin(np.sqrt(a))
 
+def latlon_to_xy(lat, lon):
+    R = 6371000
+    x = np.radians(lon) * R * np.cos(np.radians(lat))
+    y = np.radians(lat) * R
+    return x, y
+
+def add_xy_columns(df, lat_col='Latitude', lon_col='Longtitude'):
+    df[['x', 'y']] = df.apply(
+        lambda row: latlon_to_xy(row[lat_col], row[lon_col]),
+        axis=1,
+        result_type='expand',
+    )
+    return df
+
+def xy_to_latlon(x, y):
+    R = 6371000
+    lat = np.degrees(y / R)
+    lon = np.degrees(x / (R * np.cos(np.radians(lat))))
+    return lat, lon
+
 # --- Segment and renumber per MMSI
 def segment_and_renumber(df, GAP_BREAK_MIN):
     segmented = []
