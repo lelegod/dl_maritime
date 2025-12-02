@@ -539,3 +539,93 @@ def iterative_predict_delta_cog_sincos(model, initial_sequence, n_steps, scaler_
             current_sequence[-1] = pred_normalized_x
     
     return np.array(predictions_abs), np.array(predictions_raw)
+
+
+def iterative_predict_delta_cog_sincos_complex(model, initial_sequence, n_steps, scaler_X, scaler_y, device,
+                                       last_lat, last_lon):
+    """
+        Performs multi-step iterative prediction using a Transformer (Encoder-Decoder) model.
+        The function maintains the historical sequence (Encoder Input) and autoregressively
+        updates the predicted sequence (Decoder Input) until n_steps are reached.
+
+        Features expected: [delta_Lat, delta_Lon, SOG, COG_sin, COG_cos]
+        """
+    model.eval()
+
+    # 1. ENCODER INPUT (Source Sequence X): Constant historical data
+    # Input sequence must be (1, seq_len, features) for the batch dimension
+    encoder_input = torch.FloatTensor(initial_sequence).unsqueeze(0).to(device)
+
+    # Check if the model has a 'future_step' attribute, use n_steps if not.
+    # We use max(n_steps, model.future_step) to ensure the decoder input size is correct.
+    try:
+        max_target_len = max(n_steps, model.future_step)
+    except AttributeError:
+        # Fallback if model doesn't expose future_step (less robust)
+        max_target_len = n_steps
+
+    batch_size = 1
+    # The feature dimension size (5: dLat, dLon, SOG, COG_sin, COG_cos)
+    output_dim = initial_sequence.shape[1]
+
+    # 2. DECODER INPUT (Target Sequence Y): Initialized with zeros for the full sequence length
+    # Shape: (1, max_target_len, output_dim)
+    target_input_for_inference = torch.zeros(
+        batch_size,
+        max_target_len,
+        output_dim
+    ).to(device)
+
+    predictions_raw = []
+    predictions_abs = []
+    current_lat = last_lat
+    current_lon = last_lon
+
+    with torch.no_grad():
+        for t in range(n_steps):
+
+            # --- MODEL FORWARD PASS ---
+            # Call the Transformer model with both inputs.
+            # Outputs shape: (1, max_target_len, output_dim)
+            outputs = model(encoder_input, target_input_for_inference)
+
+            # Extract the prediction for the current step 't'
+            # Shape: (1, output_dim)
+            predicted_step_t = outputs[:, t, :]
+
+            # Autoregressive Update: Feed the prediction for 't' into the input for 't+1'
+            if t + 1 < n_steps:
+                target_input_for_inference[:, t + 1, :] = predicted_step_t.clone()
+
+            # --- PROCESS PREDICTION ---
+
+            # Convert prediction to numpy array (still normalized)
+            # Shape: (5,)
+            pred_normalized_y = predicted_step_t.cpu().numpy()[0]
+
+            # Convert to original scale
+            # pred_original = [delta_lat, delta_lon, sog, cog_sin, cog_cos]
+            pred_original = scaler_y.inverse_transform(pred_normalized_y.reshape(1, -1))[0]
+            predictions_raw.append(pred_original)
+
+            # Extract and convert COG
+            delta_lat = pred_original[0]
+            delta_lon = pred_original[1]
+            sog = pred_original[2]
+            cog_sin = pred_original[3]
+            cog_cos = pred_original[4]
+
+            cog_degrees = np.rad2deg(np.arctan2(cog_sin, cog_cos))
+            if cog_degrees < 0:
+                cog_degrees += 360  # Normalize to 0-360
+
+            # Calculate new absolute position (dead reckoning)
+            new_lat = current_lat + delta_lat
+            new_lon = current_lon + delta_lon
+            predictions_abs.append([new_lat, new_lon, sog, cog_degrees])
+
+            # Update current position for next iteration
+            current_lat = new_lat
+            current_lon = new_lon
+
+    return np.array(predictions_abs), np.array(predictions_raw)
