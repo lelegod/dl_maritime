@@ -629,3 +629,27 @@ def iterative_predict_delta_cog_sincos_complex(model, initial_sequence, n_steps,
             current_lon = new_lon
 
     return np.array(predictions_abs), np.array(predictions_raw)
+
+def create_seq2seq_sequences(df, seq_len, pred_horizon, input_features, target_features, min_length):
+    X_list = []
+    y_list = []
+    segment_info = []
+    
+    for (mmsi, seg), g in df.groupby(['MMSI', 'Segment']):
+        if len(g) < min_length:
+            continue
+        
+        data_input = g[input_features].values
+        data_target = g[target_features].values
+        
+        for i in range(len(g) - seq_len - pred_horizon + 1):
+            X_list.append(data_input[i:i + seq_len])
+            y_list.append(data_target[i + seq_len:i + seq_len + pred_horizon])
+            segment_info.append({
+                'mmsi': mmsi,
+                'segment': seg,
+                'seq_idx_in_segment': i,
+                'length': len(g)
+            })
+    
+    return np.array(X_list), np.array(y_list), segment_info
