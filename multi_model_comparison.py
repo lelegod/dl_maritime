@@ -7,31 +7,13 @@ import random
 
 
 def load_model_and_predict(model_path: str, model_class, input_tensor, scaler_y, target_features, prediction_horizon, device):
-    """
-    Load a model and generate predictions
-    
-    Args:
-        model_path: Path to the saved model weights
-        model_class: The model class (Seq2SeqGRU, Seq2SeqLSTM, etc.)
-        input_tensor: Input sequence tensor
-        scaler_y: Scaler for inverse transform
-        target_features: List of target feature names
-        prediction_horizon: Number of steps to predict
-        device: torch device (cuda/cpu)
-    
-    Returns:
-        Predicted deltas (inverse transformed)
-    """
-    # Load model
     model = model_class
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.eval()
     
-    # Generate prediction
     with torch.no_grad():
         seq2seq_pred = model(input_tensor, teacher_forcing_ratio=0.0)
     
-    # Inverse transform
     pred_raw = scaler_y.inverse_transform(
         seq2seq_pred.cpu().numpy().reshape(-1, len(target_features))
     ).reshape(prediction_horizon, len(target_features))
@@ -40,19 +22,6 @@ def load_model_and_predict(model_path: str, model_class, input_tensor, scaler_y,
 
 
 def deltas_to_positions(pred_raw, last_lat, last_lon, last_cog, prediction_horizon):
-    """
-    Convert delta predictions to absolute positions
-    
-    Args:
-        pred_raw: Raw predictions (deltas)
-        last_lat: Last known latitude
-        last_lon: Last known longitude
-        last_cog: Last known COG
-        prediction_horizon: Number of steps
-    
-    Returns:
-        Lists of predicted latitudes, longitudes, and COGs
-    """
     pred_lats = [last_lat]
     pred_lons = [last_lon]
     pred_cogs = [last_cog]
@@ -83,39 +52,15 @@ def compare_multiple_models(
     random_mmsi: int = None,
     save_path: str = None
 ):
-    """
-    Compare predictions from multiple models on a single map
-    
-    Args:
-        model_configs: List of dicts with keys: 'name', 'model_path', 'model_instance', 'color'
-        X_test: Test input data
-        test_indices: Indices of test samples
-        segment_info: Segment information
-        mmsi_test_set: Set of test MMSIs
-        df_delta: DataFrame with delta features
-        original_positions_test: Original positions for test set
-        scaler_y: Target scaler
-        target_features: List of target feature names
-        prediction_horizon: Number of prediction steps
-        sequence_length: Length of input sequence
-        interval: Time interval in minutes
-        device: torch device
-        random_mmsi: Optional specific MMSI to use (if None, random selection)
-        save_path: Path to save the map
-    
-    Returns:
-        folium.Map object
-    """
     print(f"Comparing {len(model_configs)} models")
     print("="*60)
     
-    # Select a random test ship if not specified
     if random_mmsi is None:
         test_mmsis = list(mmsi_test_set)
         random_mmsi = random.choice(test_mmsis)
     
     ship_test_indices = [i for i, seg in enumerate(segment_info) 
-                         if seg['mmsi'] == random_mmsi and i in test_indices]
+                        if seg['mmsi'] == random_mmsi and i in test_indices]
     
     if len(ship_test_indices) == 0:
         print(f"No test sequences found for MMSI {random_mmsi}")
@@ -127,11 +72,9 @@ def compare_multiple_models(
     
     print(f"Using MMSI: {random_mmsi}, Segment: {seg_info['segment']}")
     
-    # Get input sequence
     input_sequence = X_test[first_seq_test_idx:first_seq_test_idx+1]
     input_tensor = torch.FloatTensor(input_sequence).to(device)
     
-    # Get ground truth trajectory
     df_ship_segment = df_delta[(df_delta['MMSI'] == random_mmsi) & 
                                 (df_delta['Segment'] == seg_info['segment'])].sort_values('Timestamp')
     
@@ -142,17 +85,14 @@ def compare_multiple_models(
     df_observed = df_ship_segment.iloc[seq_start_idx:gt_end_idx].copy()
     last_input_point = df_ship_segment.iloc[seq_end_idx - 1]
     
-    # Get initial position
     last_lat = original_positions_test.iloc[first_seq_test_idx]['last_lat']
     last_lon = original_positions_test.iloc[first_seq_test_idx]['last_lon']
     last_cog = original_positions_test.iloc[first_seq_test_idx]['last_cog']
     
-    # Create base map
     center_lat = df_observed['Latitude'].mean()
     center_lon = df_observed['Longtitude'].mean()
     m = folium.Map(location=[center_lat, center_lon], zoom_start=12)
     
-    # Plot observed trajectory (blue)
     observed_coords = df_observed[['Latitude', 'Longtitude']].values.tolist()
     folium.PolyLine(
         observed_coords,
@@ -161,7 +101,6 @@ def compare_multiple_models(
         opacity=0.8
     ).add_to(m)
     
-    # Ground truth future trajectory (if available)
     gt_future_coords = df_observed.iloc[sequence_length:][['Latitude', 'Longtitude']].values.tolist()
     if len(gt_future_coords) > 0:
         folium.PolyLine(
@@ -173,7 +112,6 @@ def compare_multiple_models(
             popup='Ground Truth'
         ).add_to(m)
     
-    # Generate predictions for each model
     all_predictions = {}
     
     for config in model_configs:
@@ -185,13 +123,11 @@ def compare_multiple_models(
         print(f"\nProcessing {model_name}...")
         
         try:
-            # Load and predict
             pred_raw = load_model_and_predict(
                 model_path, model_instance, input_tensor, 
                 scaler_y, target_features, prediction_horizon, device
             )
             
-            # Convert to positions
             pred_lats, pred_lons, pred_cogs = deltas_to_positions(
                 pred_raw, last_lat, last_lon, last_cog, prediction_horizon
             )
@@ -203,7 +139,6 @@ def compare_multiple_models(
                 'color': color
             }
             
-            # Plot prediction trajectory
             pred_coords = [[pred_lats[i], pred_lons[i]] for i in range(len(pred_lats))]
             folium.PolyLine(
                 pred_coords,
@@ -213,7 +148,6 @@ def compare_multiple_models(
                 dash_array='5, 10'
             ).add_to(m)
             
-            # Calculate error if ground truth available
             if len(gt_future_coords) > 0:
                 from utils import haversine_m
                 gt_future = df_ship_segment.iloc[seq_end_idx:gt_end_idx][['Latitude', 'Longtitude']].values
@@ -232,7 +166,6 @@ def compare_multiple_models(
             print(f"  Error processing {model_name}: {str(e)}")
             continue
     
-    # Add legend
     legend_html = '''
     <div style="position: fixed; 
                 top: 10px; right: 10px; width: 220px; height: auto; 
@@ -250,7 +183,6 @@ def compare_multiple_models(
     legend_html += '</div>'
     m.get_root().html.add_child(folium.Element(legend_html))
     
-    # Save map if path provided
     if save_path:
         m.save(save_path)
         print(f"\nMap saved to: {save_path}")
@@ -276,27 +208,6 @@ def multi_horizon_iterative_prediction(
     input_features: List[str],
     device
 ):
-    """
-    Generate multi-horizon predictions using iterative approach
-    
-    Args:
-        model_instance: Trained model instance
-        initial_sequence: Initial input sequence [1, seq_len, features]
-        last_lat: Last known latitude
-        last_lon: Last known longitude
-        last_cog: Last known COG
-        last_sog: Last known SOG
-        max_steps: Maximum number of steps to predict
-        prediction_horizon: Model's prediction horizon
-        scaler_y: Target scaler
-        scaler_lat_lon: Lat/Lon scaler
-        target_features: List of target feature names
-        input_features: List of input feature names
-        device: torch device
-    
-    Returns:
-        Lists of predicted latitudes, longitudes, COGs, and SOGs
-    """
     model_instance.eval()
     
     current_sequence = initial_sequence.copy()
@@ -313,12 +224,10 @@ def multi_horizon_iterative_prediction(
             input_tensor = torch.FloatTensor(current_sequence).to(device)
             seq2seq_pred = model_instance(input_tensor, teacher_forcing_ratio=0.0)
         
-        # Inverse transform all predictions
         pred_batch = scaler_y.inverse_transform(
             seq2seq_pred.cpu().numpy().reshape(-1, len(target_features))
         ).reshape(prediction_horizon, len(target_features))
         
-        # Process predictions in this batch
         steps_to_use = min(prediction_horizon, max_steps - iteration * prediction_horizon)
         
         for step in range(steps_to_use):
@@ -336,7 +245,6 @@ def multi_horizon_iterative_prediction(
             pred_cogs.append(next_cog)
             pred_sogs.append(next_sog)
         
-        # Update sequence for next iteration
         if iteration < num_iterations - 1:
             new_inputs = []
             for step in range(prediction_horizon):
@@ -393,38 +301,11 @@ def compare_multiple_models_multihorizon(
     random_mmsi: Optional[int] = None,
     save_path: Optional[str] = None
 ):
-    """
-    Compare multi-horizon predictions from multiple models on a single map
-    
-    Args:
-        model_configs: List of dicts with keys: 'name', 'model_path', 'model_instance', 'color'
-        X_test: Test input data
-        test_indices: Indices of test samples
-        segment_info: Segment information
-        mmsi_test_set: Set of test MMSIs
-        df_delta: DataFrame with delta features
-        original_positions_test: Original positions for test set
-        scaler_y: Target scaler
-        scaler_lat_lon: Lat/Lon scaler
-        target_features: List of target feature names
-        input_features: List of input feature names
-        prediction_horizon: Number of prediction steps
-        sequence_length: Length of input sequence
-        interval: Time interval in minutes
-        device: torch device
-        max_steps: Maximum prediction steps (default: 30 for 150min)
-        random_mmsi: Optional specific MMSI to use
-        save_path: Path to save the map
-    
-    Returns:
-        folium.Map object
-    """
     print(f"Multi-Horizon Model Comparison ({max_steps * interval} minutes)")
     print("="*60)
     
     min_required_points = sequence_length + max_steps
     
-    # Find valid test sequences
     valid_test_indices = []
     for i in test_indices:
         seg_info = segment_info[i]
@@ -437,9 +318,7 @@ def compare_multiple_models_multihorizon(
         print(f"No test sequences with {max_steps * interval}+ minutes of future data found")
         return None
     
-    # Select a sequence
     if random_mmsi is not None:
-        # Filter by MMSI
         mmsi_valid = [i for i in valid_test_indices if segment_info[i]['mmsi'] == random_mmsi]
         if len(mmsi_valid) == 0:
             print(f"No valid sequences found for MMSI {random_mmsi}")
@@ -455,7 +334,6 @@ def compare_multiple_models_multihorizon(
     print(f"Selected MMSI: {selected_mmsi}, Segment: {seg_info['segment']}")
     print(f"Segment length: {seg_info['length']} points ({seg_info['length'] * interval} min)")
     
-    # Get segment data
     df_ship_segment = df_delta[(df_delta['MMSI'] == selected_mmsi) & 
                                 (df_delta['Segment'] == seg_info['segment'])].sort_values('Timestamp')
     
@@ -469,19 +347,16 @@ def compare_multiple_models_multihorizon(
     print(f"Observed: {len(df_observed)} points ({sequence_length * interval} min)")
     print(f"Ground truth: {len(df_ground_truth)} points ({len(df_ground_truth) * interval} min)")
     
-    # Get initial sequence
     initial_sequence = X_test[selected_test_idx:selected_test_idx+1]
     last_lat = original_positions_test.iloc[selected_test_idx]['last_lat']
     last_lon = original_positions_test.iloc[selected_test_idx]['last_lon']
     last_cog = original_positions_test.iloc[selected_test_idx]['last_cog']
     last_sog = last_input_point['SOG']
     
-    # Create base map
     center_lat = df_ship_segment['Latitude'].mean()
     center_lon = df_ship_segment['Longtitude'].mean()
     m = folium.Map(location=[center_lat, center_lon], zoom_start=11)
     
-    # Plot observed trajectory
     observed_coords = df_observed[['Latitude', 'Longtitude']].values.tolist()
     folium.PolyLine(
         observed_coords,
@@ -490,7 +365,6 @@ def compare_multiple_models_multihorizon(
         opacity=0.8
     ).add_to(m)
     
-    # Plot ground truth
     gt_coords = df_ground_truth[['Latitude', 'Longtitude']].values.tolist()
     if len(gt_coords) > 0:
         folium.PolyLine(
@@ -502,7 +376,6 @@ def compare_multiple_models_multihorizon(
             popup='Ground Truth'
         ).add_to(m)
     
-    # Generate predictions for each model
     all_predictions = {}
     
     for config in model_configs:
@@ -514,10 +387,8 @@ def compare_multiple_models_multihorizon(
         print(f"\nProcessing {model_name}...")
         
         try:
-            # Load model weights
             model_instance.load_state_dict(torch.load(model_path, map_location=device))
             
-            # Generate multi-horizon predictions
             pred_lats, pred_lons, pred_cogs, pred_sogs = multi_horizon_iterative_prediction(
                 model_instance=model_instance,
                 initial_sequence=initial_sequence,
@@ -542,7 +413,6 @@ def compare_multiple_models_multihorizon(
                 'color': color
             }
             
-            # Plot prediction trajectory
             pred_coords = [[pred_lats[i], pred_lons[i]] for i in range(len(pred_lats))]
             folium.PolyLine(
                 pred_coords,
@@ -552,7 +422,6 @@ def compare_multiple_models_multihorizon(
                 dash_array='5, 10'
             ).add_to(m)
             
-            # Calculate errors
             from utils import haversine_m
             all_errors = []
             for idx in range(1, min(len(pred_lats), len(df_ground_truth) + 1)):
@@ -574,7 +443,6 @@ def compare_multiple_models_multihorizon(
             traceback.print_exc()
             continue
     
-    # Add legend
     legend_html = '''
     <div style="position: fixed; 
                 top: 10px; right: 10px; width: 220px; height: auto; 
@@ -591,7 +459,6 @@ def compare_multiple_models_multihorizon(
     legend_html += '</div>'
     m.get_root().html.add_child(folium.Element(legend_html))
     
-    # Save map
     if save_path:
         m.save(save_path)
         print(f"\nMap saved to: {save_path}")
