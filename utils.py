@@ -5,71 +5,37 @@ import torch
 
 def create_mmsi_dict_from_file(file_path):
     mmsi_type_dict = {}
-    
     try:
         with open(file_path, 'r') as f:
             for line in f:
                 line = line.strip()
                 if not line:
                     continue
-
                 try:
                     mmsi_part, type_part = line.split(',', 1)
-
                     mmsi_key = mmsi_part.split(':', 1)[1].strip()
                     ship_type_value = type_part.split(':', 1)[1].strip()
-
                     mmsi_type_dict[mmsi_key] = ship_type_value
-                    
                 except (ValueError, IndexError):
                     print(f"Skipping malformed line: '{line}'")
-
     except FileNotFoundError:
         print(f"Error: The file '{file_path}' was not found.")
         return None
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
-
     return mmsi_type_dict
-    
-def plot_ship_trajectory(df, mmsi, save_path=None):
-    """
-    Plots the trajectory of a ship given its MMSI.
-    
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame containing at least ['MMSI', 'Latitude', 'Longitude'] columns.
-    mmsi : int or str
-        The MMSI of the ship to plot.
-    save_path : str, optional
-        Path to save the interactive HTML map. If None, it will just return the map object. When working with Jupyter, no need for save file.
-    
-    Returns
-    -------
-    folium.Map
-        Folium map object with the trajectory plotted.
-    """
-    # Filter for the requested MMSI
-    df_ship = df[df['MMSI'] == mmsi].sort_values('Timestamp')
 
+def plot_ship_trajectory(df, mmsi, save_path=None):
+    df_ship = df[df['MMSI'] == mmsi].sort_values('Timestamp')
     if df_ship.empty:
         print(f"No data found for MMSI {mmsi}.")
         return None
-
-    # Compute map center
     center_lat = df_ship['Latitude'].mean()
     center_lon = df_ship['Longtitude'].mean()
-
-    # Create folium map
     m = folium.Map(location=[center_lat, center_lon], zoom_start=6)
-
-    # Plot trajectory line
     coords = list(zip(df_ship['Latitude'], df_ship['Longtitude']))
     folium.PolyLine(coords, color="blue", weight=2.5, opacity=0.8).add_to(m)
-
-    # Optional: add markers for each point
     for _, row in df_ship.iterrows():
         folium.CircleMarker(
             location=[row['Latitude'], row['Longtitude']],
@@ -77,13 +43,11 @@ def plot_ship_trajectory(df, mmsi, save_path=None):
             color='red',
             fill=True
         ).add_to(m)
-
     if save_path:
         m.save(save_path)
         print(f"Map saved to {save_path}")
-
     return m
-    
+
 def haversine_m(lat1, lon1, lat2, lon2):
     R = 6371000.0
     lat1, lon1, lat2, lon2 = map(np.deg2rad, [lat1, lon1, lat2, lon2])
@@ -91,7 +55,6 @@ def haversine_m(lat1, lon1, lat2, lon2):
     a = np.sin(dlat/2)**2 + np.cos(lat1)*np.cos(lat2)*np.sin(dlon/2)**2
     return 2 * R * np.arcsin(np.sqrt(a))
 
-# --- Segment and renumber per MMSI
 def segment_and_renumber(df, GAP_BREAK_MIN):
     segmented = []
     for mmsi, g in df.groupby("MMSI", observed=True):
@@ -103,94 +66,38 @@ def segment_and_renumber(df, GAP_BREAK_MIN):
     return pd.concat(segmented, ignore_index=True)
 
 def filter_stationary_ships(df, radius_threshold=1000, speed_threshold=2.0):
-    """
-    Removes ships that remain within a small area and never exceed a given speed.
-    
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Must include ['MMSI', 'Latitude', 'Longtitude', 'SOG'] columns.
-    radius_threshold : float
-        Maximum radius (m) around mean position to consider stationary.
-    speed_threshold : float
-        Maximum SOG (knots) allowed for stationary ships.
-    
-    Returns
-    -------
-    pd.DataFrame
-        A cleaned DataFrame with stationary ships removed.
-    """
     stationary_mmsi = []
-
     for mmsi, group in df.groupby("MMSI"):
         mean_lat = group["Latitude"].mean()
         mean_lon = group["Longtitude"].mean()
-        
         distances = haversine_m(group["Latitude"], group["Longtitude"], mean_lat, mean_lon)
         max_dist = distances.max()
         max_speed = group["SOG"].max()
-
         if max_dist < radius_threshold and max_speed < speed_threshold:
             stationary_mmsi.append(mmsi)
-
     print(f"Found {len(stationary_mmsi)} stationary ships out of {df['MMSI'].nunique()}.")
-
-    # Return df with stationary ships removed
     df_clean = df[~df["MMSI"].isin(stationary_mmsi)].copy()
-
     print(f"Cleaned DF contains {df_clean['MMSI'].nunique()} ships.")
     return df_clean
 
 def plot_ship_trajectory_with_prediction(df_obs, df_pred, mmsi, save_path=None):
-    """
-    Plots both observed and predicted trajectories for a ship.
-
-    Parameters
-    ----------
-    df_obs : pd.DataFrame
-        Observed data containing ['MMSI', 'Latitude', 'Longtitude'].
-    df_pred : pd.DataFrame
-        Predicted data containing ['MMSI', 'Latitude', 'Longtitude'].
-    mmsi : int or str
-        MMSI of the ship.
-    save_path : str, optional
-        Output path for HTML map.
-
-    Returns
-    -------
-    folium.Map
-    """
-
-    # Filter observed data
     df_obs_ship = df_obs[df_obs['MMSI'] == mmsi].sort_values('Timestamp')
     if df_obs_ship.empty:
         print(f"No observed data found for MMSI {mmsi}.")
         return None
-
-    # Filter predicted data
     df_pred_ship = df_pred[df_pred['MMSI'] == mmsi].sort_values('Timestamp')
     if df_pred_ship.empty:
         print(f"No predicted data found for MMSI {mmsi}.")
         return None
-
-    # Compute map center from observed data
     center_lat = df_obs_ship['Latitude'].mean()
     center_lon = df_obs_ship['Longtitude'].mean()
-
-    # Create folium map
     m = folium.Map(location=[center_lat, center_lon], zoom_start=6)
-
-    # Observed trajectory
     obs_coords = list(zip(df_obs_ship['Latitude'], df_obs_ship['Longtitude']))
     folium.PolyLine(obs_coords, color="blue", weight=3, opacity=0.9,
                     tooltip="Observed Trajectory").add_to(m)
-
-    # Predicted trajectory
     pred_coords = list(zip(df_pred_ship['Latitude'], df_pred_ship['Longtitude']))
     folium.PolyLine(pred_coords, color="green", weight=3, opacity=0.9,
                     tooltip="Predicted Trajectory").add_to(m)
-
-    # Markers for observed points
     for _, row in df_obs_ship.iterrows():
         folium.CircleMarker(
             location=[row['Latitude'], row['Longtitude']],
@@ -198,8 +105,6 @@ def plot_ship_trajectory_with_prediction(df_obs, df_pred, mmsi, save_path=None):
             color='blue',
             fill=True
         ).add_to(m)
-
-    # Optional markers for predicted points (commented out)
     for _, row in df_pred_ship.iterrows():
         folium.CircleMarker(
             location=[row['Latitude'], row['Longtitude']],
@@ -207,91 +112,31 @@ def plot_ship_trajectory_with_prediction(df_obs, df_pred, mmsi, save_path=None):
             color='green',
             fill=True
         ).add_to(m)
-
     if save_path:
         m.save(save_path)
         print(f"Map saved to {save_path}")
-
     return m
 
 def create_sequences(data, sequence_length, features, target_features):
-    """
-    Create sequences for time series prediction.
-    
-    Parameters:
-    -----------
-    data : pd.DataFrame
-        Input dataframe for a single segment
-    sequence_length : int
-        Number of timesteps to use as input
-    features : list
-        List of feature column names to use as input
-    target_features : list
-        List of feature column names to predict
-        
-    Returns:
-    --------
-    X : np.array
-        Input sequences of shape (n_samples, sequence_length, n_features)
-    y : np.array
-        Target values of shape (n_samples, n_target_features)
-    """
     X, y = [], []
-    
     data_values = data[features].values
     target_values = data[target_features].values
-    
     for i in range(len(data_values) - sequence_length):
         X.append(data_values[i:i+sequence_length])
         y.append(target_values[i+sequence_length])
-    
     return np.array(X), np.array(y)
 
-
 def prepare_training_data(df, sequence_length, features, target_features, min_segment_length):
-    """
-    Prepare training data from the entire dataset.
-    
-    Parameters:
-    -----------
-    df : pd.DataFrame
-        Cleaned AIS data
-    sequence_length : int
-        Number of timesteps for input sequences
-    features : list
-        Input feature names
-    target_features : list
-        Target feature names
-    min_segment_length : int
-        Minimum segment length to include
-        
-    Returns:
-    --------
-    X : np.array
-        All input sequences
-    y : np.array
-        All target values
-    segment_info : list
-        Information about each sequence (one entry per sequence in X/y)
-    """
     X_all, y_all = [], []
     segment_info = []
-    
     for (mmsi, seg), group in df.groupby(["MMSI", "Segment"]):
-        # Skip short segments
         if len(group) < min_segment_length:
             continue
-            
-        # Sort by timestamp to ensure correct order
         group = group.sort_values("Timestamp")
-        
-        # Create sequences for this segment
         X_seg, y_seg = create_sequences(group, sequence_length, features, target_features)
-        
         if len(X_seg) > 0:
             X_all.append(X_seg)
             y_all.append(y_seg)
-            # Add one entry per sequence (not per segment)
             for i in range(len(X_seg)):
                 segment_info.append({
                     'mmsi': mmsi,
@@ -299,58 +144,21 @@ def prepare_training_data(df, sequence_length, features, target_features, min_se
                     'length': len(group),
                     'seq_idx_in_segment': i
                 })
-    
-    # Concatenate all sequences
     X = np.concatenate(X_all, axis=0)
     y = np.concatenate(y_all, axis=0)
-    
     return X, y, segment_info
 
 def prepare_delta_sequences(df, seq_length, features, target_features, min_length):
-    """
-    Prepare sequences with delta coordinates.
-    Uses create_sequences internally for consistency with prepare_training_data.
-    
-    Parameters:
-    -----------
-    df : pd.DataFrame
-        DataFrame with delta coordinates computed (delta_Lat, delta_Lon, etc.)
-    seq_length : int
-        Number of timesteps for input sequences
-    features : list
-        Input feature names (e.g., ['delta_Lat', 'delta_Lon', 'SOG', 'COG'])
-    target_features : list
-        Target feature names
-    min_length : int
-        Minimum segment length to include
-        
-    Returns:
-    --------
-    X : np.array
-        All input sequences
-    y : np.array
-        All target values
-    segment_info : list
-        Information about each sequence (one entry per sequence in X/y)
-    """
     X_all, y_all = [], []
     segment_info = []
-    
     for (mmsi, seg), group in df.groupby(['MMSI', 'Segment']):
-        # Skip short segments
         if len(group) < min_length:
             continue
-        
-        # Sort by timestamp to ensure correct order
         group = group.sort_values('Timestamp')
-        
-        # Create sequences for this segment using the shared function
         X_seg, y_seg = create_sequences(group, seq_length, features, target_features)
-        
         if len(X_seg) > 0:
             X_all.append(X_seg)
             y_all.append(y_seg)
-            # Add one entry per sequence (not per segment)
             for i in range(len(X_seg)):
                 segment_info.append({
                     'mmsi': mmsi,
@@ -358,290 +166,133 @@ def prepare_delta_sequences(df, seq_length, features, target_features, min_lengt
                     'length': len(group),
                     'seq_idx_in_segment': i
                 })
-    
-    # Concatenate all sequences
     X = np.concatenate(X_all, axis=0)
     y = np.concatenate(y_all, axis=0)
-    
     return X, y, segment_info
 
-# Function for iterative prediction
 def iterative_predict(model, initial_sequence, n_steps, scaler_X, scaler_y, device):
-    """
-    Perform multi-step iterative prediction.
-    
-    Args:
-        model: Trained GRU model
-        initial_sequence: Input sequence (normalized), shape (seq_len, n_features)
-        n_steps: Number of prediction steps
-        scaler_X: Input scaler (for input features)
-        scaler_y: Target scaler (for output features)
-        device: PyTorch device
-    
-    Returns:
-        predictions: Array of predictions (original scale), shape (n_steps, n_features)
-    """
     model.eval()
     current_sequence = initial_sequence.copy()
     predictions = []
-    
     with torch.no_grad():
         for step in range(n_steps):
-            # Prepare input tensor
             input_tensor = torch.FloatTensor(current_sequence).unsqueeze(0).to(device)
-            
-            # Predict next step (normalized by scaler_y)
             pred_normalized_y = model(input_tensor).cpu().numpy()[0]
-            
-            # Convert prediction to original scale
             pred_original = scaler_y.inverse_transform(pred_normalized_y.reshape(1, -1))[0]
             predictions.append(pred_original)
-            
-            # Update sequence: shift and append prediction
-            # CRITICAL FIX: Re-normalize prediction using scaler_X (not scaler_y)
-            # because the input sequence expects scaler_X normalization
             pred_normalized_x = scaler_X.transform(pred_original.reshape(1, -1))[0]
-            
             current_sequence = np.roll(current_sequence, -1, axis=0)
-            current_sequence[-1] = pred_normalized_x  # Normalized by scaler_X
-    
+            current_sequence[-1] = pred_normalized_x
     return np.array(predictions)
 
 def iterative_predict_delta(model, initial_sequence, n_steps, scaler_X, scaler_y, device, 
                             last_lat, last_lon):
-    """
-    Perform multi-step iterative prediction with delta coordinates.
-    Returns both delta predictions and absolute positions.
-    
-    Args:
-        model: Trained GRU model
-        initial_sequence: Input sequence (normalized), shape (seq_len, n_features)
-        n_steps: Number of prediction steps
-        scaler_X: Input scaler (for input features)
-        scaler_y: Target scaler (for output features)
-        device: PyTorch device
-        last_lat: Last known absolute latitude
-        last_lon: Last known absolute longitude
-    
-    Returns:
-        predictions_abs: Array of absolute predictions, shape (n_steps, 4) [lat, lon, sog, cog]
-        predictions_delta: Array of delta predictions, shape (n_steps, 4)
-    """
     model.eval()
     current_sequence = initial_sequence.copy()
     predictions_delta = []
     predictions_abs = []
-    
     current_lat = last_lat
     current_lon = last_lon
-    
     with torch.no_grad():
         for step in range(n_steps):
-            # Prepare input tensor
             input_tensor = torch.FloatTensor(current_sequence).unsqueeze(0).to(device)
-            
-            # Predict next step (normalized by scaler_y)
             pred_normalized_y = model(input_tensor).cpu().numpy()[0]
-            
-            # Convert to original scale (deltas)
             pred_delta = scaler_y.inverse_transform(pred_normalized_y.reshape(1, -1))[0]
             predictions_delta.append(pred_delta)
-            
-            # Convert delta to absolute position
             new_lat = current_lat + pred_delta[0]
             new_lon = current_lon + pred_delta[1]
             predictions_abs.append([new_lat, new_lon, pred_delta[2], pred_delta[3]])
-            
-            # Update current position for next iteration
             current_lat = new_lat
             current_lon = new_lon
-            
-            # Update sequence: shift and append prediction
-            # CRITICAL FIX: Re-normalize prediction using scaler_X (not scaler_y)
-            # because the input sequence expects scaler_X normalization
             pred_normalized_x = scaler_X.transform(pred_delta.reshape(1, -1))[0]
-            
             current_sequence = np.roll(current_sequence, -1, axis=0)
-            current_sequence[-1] = pred_normalized_x  # Normalized by scaler_X
-    
+            current_sequence[-1] = pred_normalized_x
     return np.array(predictions_abs), np.array(predictions_delta)
-
 
 def iterative_predict_delta_cog_sincos(model, initial_sequence, n_steps, scaler_X, scaler_y, device, 
                                         last_lat, last_lon):
-    """
-    Perform multi-step iterative prediction with delta coordinates and COG sin/cos encoding.
-    Returns both delta predictions and absolute positions.
-    
-    Features expected: [delta_Lat, delta_Lon, SOG, COG_sin, COG_cos]
-    
-    Args:
-        model: Trained GRU model
-        initial_sequence: Input sequence (normalized), shape (seq_len, 5)
-        n_steps: Number of prediction steps
-        scaler_X: Input scaler (for input features)
-        scaler_y: Target scaler (for output features)
-        device: PyTorch device
-        last_lat: Last known absolute latitude
-        last_lon: Last known absolute longitude
-    
-    Returns:
-        predictions_abs: Array of absolute predictions, shape (n_steps, 4) [lat, lon, sog, cog_degrees]
-        predictions_raw: Array of raw predictions, shape (n_steps, 5) [delta_lat, delta_lon, sog, cog_sin, cog_cos]
-    """
     model.eval()
     current_sequence = initial_sequence.copy()
     predictions_raw = []
     predictions_abs = []
-    
     current_lat = last_lat
     current_lon = last_lon
-    
     with torch.no_grad():
         for step in range(n_steps):
-            # Prepare input tensor
             input_tensor = torch.FloatTensor(current_sequence).unsqueeze(0).to(device)
-            
-            # Predict next step (normalized by scaler_y)
             pred_normalized_y = model(input_tensor).cpu().numpy()[0]
-            
-            # Convert to original scale
             pred_original = scaler_y.inverse_transform(pred_normalized_y.reshape(1, -1))[0]
-            # pred_original = [delta_lat, delta_lon, sog, cog_sin, cog_cos]
             predictions_raw.append(pred_original)
-            
-            # Extract components
             delta_lat = pred_original[0]
             delta_lon = pred_original[1]
             sog = pred_original[2]
             cog_sin = pred_original[3]
             cog_cos = pred_original[4]
-            
-            # Convert COG sin/cos back to degrees
             cog_degrees = np.rad2deg(np.arctan2(cog_sin, cog_cos))
             if cog_degrees < 0:
-                cog_degrees += 360  # Normalize to 0-360
-            
-            # Convert delta to absolute position
+                cog_degrees += 360
             new_lat = current_lat + delta_lat
             new_lon = current_lon + delta_lon
             predictions_abs.append([new_lat, new_lon, sog, cog_degrees])
-            
-            # Update current position for next iteration
             current_lat = new_lat
             current_lon = new_lon
-            
-            # Update sequence: shift and append prediction
-            # Re-normalize prediction using scaler_X
             pred_normalized_x = scaler_X.transform(pred_original.reshape(1, -1))[0]
-            
             current_sequence = np.roll(current_sequence, -1, axis=0)
             current_sequence[-1] = pred_normalized_x
-    
     return np.array(predictions_abs), np.array(predictions_raw)
-
 
 def iterative_predict_delta_cog_sincos_complex(model, initial_sequence, n_steps, scaler_X, scaler_y, device,
                                        last_lat, last_lon):
-    """
-        Performs multi-step iterative prediction using a Transformer (Encoder-Decoder) model.
-        The function maintains the historical sequence (Encoder Input) and autoregressively
-        updates the predicted sequence (Decoder Input) until n_steps are reached.
-
-        Features expected: [delta_Lat, delta_Lon, SOG, COG_sin, COG_cos]
-        """
     model.eval()
-
-    # 1. ENCODER INPUT (Source Sequence X): Constant historical data
-    # Input sequence must be (1, seq_len, features) for the batch dimension
     encoder_input = torch.FloatTensor(initial_sequence).unsqueeze(0).to(device)
-
-    # Check if the model has a 'future_step' attribute, use n_steps if not.
-    # We use max(n_steps, model.future_step) to ensure the decoder input size is correct.
     try:
         max_target_len = max(n_steps, model.future_step)
     except AttributeError:
-        # Fallback if model doesn't expose future_step (less robust)
         max_target_len = n_steps
-
     batch_size = 1
-    # The feature dimension size (5: dLat, dLon, SOG, COG_sin, COG_cos)
     output_dim = initial_sequence.shape[1]
-
-    # 2. DECODER INPUT (Target Sequence Y): Initialized with zeros for the full sequence length
-    # Shape: (1, max_target_len, output_dim)
     target_input_for_inference = torch.zeros(
         batch_size,
         max_target_len,
         output_dim
     ).to(device)
-
     predictions_raw = []
     predictions_abs = []
     current_lat = last_lat
     current_lon = last_lon
-
     with torch.no_grad():
         for t in range(n_steps):
-
-            # --- MODEL FORWARD PASS ---
-            # Call the Transformer model with both inputs.
-            # Outputs shape: (1, max_target_len, output_dim)
             outputs = model(encoder_input, target_input_for_inference)
-
-            # Extract the prediction for the current step 't'
-            # Shape: (1, output_dim)
             predicted_step_t = outputs[:, t, :]
-
-            # Autoregressive Update: Feed the prediction for 't' into the input for 't+1'
             if t + 1 < n_steps:
                 target_input_for_inference[:, t + 1, :] = predicted_step_t.clone()
-
-            # --- PROCESS PREDICTION ---
-
-            # Convert prediction to numpy array (still normalized)
-            # Shape: (5,)
             pred_normalized_y = predicted_step_t.cpu().numpy()[0]
-
-            # Convert to original scale
-            # pred_original = [delta_lat, delta_lon, sog, cog_sin, cog_cos]
             pred_original = scaler_y.inverse_transform(pred_normalized_y.reshape(1, -1))[0]
             predictions_raw.append(pred_original)
-
-            # Extract and convert COG
             delta_lat = pred_original[0]
             delta_lon = pred_original[1]
             sog = pred_original[2]
             cog_sin = pred_original[3]
             cog_cos = pred_original[4]
-
             cog_degrees = np.rad2deg(np.arctan2(cog_sin, cog_cos))
             if cog_degrees < 0:
-                cog_degrees += 360  # Normalize to 0-360
-
-            # Calculate new absolute position (dead reckoning)
+                cog_degrees += 360
             new_lat = current_lat + delta_lat
             new_lon = current_lon + delta_lon
             predictions_abs.append([new_lat, new_lon, sog, cog_degrees])
-
-            # Update current position for next iteration
             current_lat = new_lat
             current_lon = new_lon
-
     return np.array(predictions_abs), np.array(predictions_raw)
 
 def create_seq2seq_sequences(df, seq_len, pred_horizon, input_features, target_features, min_length):
     X_list = []
     y_list = []
     segment_info = []
-    
     for (mmsi, seg), g in df.groupby(['MMSI', 'Segment']):
         if len(g) < min_length:
             continue
-        
         data_input = g[input_features].values
         data_target = g[target_features].values
-        
         for i in range(len(g) - seq_len - pred_horizon + 1):
             X_list.append(data_input[i:i + seq_len])
             y_list.append(data_target[i + seq_len:i + seq_len + pred_horizon])
@@ -651,5 +302,4 @@ def create_seq2seq_sequences(df, seq_len, pred_horizon, input_features, target_f
                 'seq_idx_in_segment': i,
                 'length': len(g)
             })
-    
     return np.array(X_list), np.array(y_list), segment_info
